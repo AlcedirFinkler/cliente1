@@ -1,0 +1,269 @@
+/* Estilos gerais */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Cabeçalho */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #003366;
+    color: white;
+    padding: 10px 20px;
+}
+
+.header img {
+    width: 50px;
+    height: 50px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+/* Container principal */
+.container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Lista de chamados */
+.chamados-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.chamados-list li {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chamados-list li strong {
+    font-size: 1.2rem;
+    color: #007bff;
+}
+
+.chamados-list li p {
+    margin: 10px 0 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Ações */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 20px;
+    align-items: center;
+}
+
+.actions a {
+    text-decoration: none;
+    color: white;
+    background-color: #007bff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    width: 30%;
+    text-align: center;
+}
+
+.actions a:hover {
+    background-color: #0056b3;
+}
+
+/* Botões de ação */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.btn-edit {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
+
+/* Filtros de cabeçalho */
+.header-filters {
+    display: flex; /* Define o layout como Flexbox, permitindo o controle do posicionamento dos itens filhos */
+    justify-content: center; /* Centraliza os itens filhos horizontalmente dentro do container */
+    flex-wrap: wrap; /* Permite que os itens se reorganizem para a próxima linha, se necessário, quando não houver espaço suficiente */
+    gap: 15px; /* Define o espaço entre os itens filhos dentro do container */
+    background-color: #f4f4f4; /* Define a cor de fundo do container */
+    border-radius: 8px; /* Aplica bordas arredondadas ao container */
+    padding: 15px; /* Adiciona espaçamento interno (dentro da div) de 15px em todos os lados */
+    align-items: flex-end; /* Alinha os itens filhos ao fundo (inferior) do container */
+}
+
+.header-filters > div {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.header-filters label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.header-filters select,
+.header-filters input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.9em;
+}
+
+.filter-button {
+    display: flex;
+    align-items: flex-end;
+    margin-left: auto;
+}
+
+.filter-button button {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Tabelas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f1f1f1;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Botões de imagem */
+.mt-2.botao-imagem {
+    margin-top: 50px;
+}
+
+/* Estilos de toggle */
+.toggle-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.toggle-button.selected {
+    background-color: #0056b3;
+    color: white;
+    font-weight: bold;
+}
+
+.toggle-button.deselected {
+    background-color: #ccc;
+    color: #666;
+}
+
+.toggle-button:hover {
+    background-color: #003366;
+    color: white;
+}
+
+/* Estilos de imagem */
+img.icon {
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+input, select, textarea {
+    width: 100%; /* Garantir que o campo ocupe toda a largura disponível */
+}
+
+.selected-fornecedor {
+    background-color: #d3f9d8;
+    font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .header-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-button {
+        margin-left: 0;
+        align-self: center;
+    }
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .actions a {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
