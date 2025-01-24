@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Criar Manutenção!{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Gerar Ordem de Serviço - Manutenção Preventiva</h2>
+        </div>
+        <div class="card-body">
+            <h5>Detalhes da Manutenção</h5>
+            <p><strong>Equipamento:</strong> {{ manutencao.equipamento.nome }}</p>
+            <p><strong>Descrição:</strong> {{ manutencao.descricao }}</p>
+            <p><strong>Data Prevista:</strong> {{ manutencao.data_proxima_manutencao }}</p>
+            
+            {% if manutencao.possui_os_aberta %}
+                <div class="alert alert-warning">
+                    Já existe uma ordem de serviço em andamento para esta manutenção.
+                </div>
+                {% else %}
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group mb-3">
+                        <label for="tecnico" class="form-label"><strong>Selecione o Técnico Responsável:</strong></label>
+                        <select name="tecnico" id="tecnico" class="form-control" required>
+                            <option value="">Selecione um técnico...</option>
+                            {% for tecnico in tecnicos %}
+                                <option value="{{ tecnico.id }}">
+                                    {{ tecnico.username }}
+                                    ({{ tecnico.chamados_em_andamento }} chamados em andamento)
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        Gerar Ordem de Serviço
+                    </button>
+                </form>
+            {% endif %}
+            
+            <a href="{% url 'listar_manutencoes' %}" class="btn btn-secondary mt-3">Voltar</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

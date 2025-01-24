@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Excluir Manutenção Preventiva{% endblock %}
+{% block content %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <div class="actions" style="display: flex; justify-content: flex-end; align-items: left; height: 5vh;">
+        <a href="{% url 'listar_manutencoes' %}" class="action-link btn btn-secondary btn-sm">Voltar</a>
+    </div>
+
+    <h1>Excluir Manutenção Preventiva</h1>
+    
+    <div class="alert alert-danger" role="alert">
+        <strong>Tem certeza que deseja excluir esta manutenção?</strong>
+        <p><strong>Equipamento:</strong> {{ manutencao.equipamento.nome }}</p>
+        <p><strong>Descrição:</strong> {{ manutencao.descricao }}</p>
+        <p><strong>Data da Última Manutenção:</strong> {{ manutencao.data_ultima_manutencao }}</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Excluir Manutenção</button>
+    </form>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

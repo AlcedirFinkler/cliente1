@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Editar Manutenção{% endblock %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    .selected-part-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        margin-bottom: 5px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+    .remove-part, .edit-part {
+        color: red;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+    .edit-part {
+        color: blue;
+    }
+    .part-list-item.selected-part {
+    background-color: #e0e0e0;
+    }
+    .part-list-item.selected-part .quantity-input {
+    display: block;
+    }
+</style>
+
+<div class="actions" style="display: flex; align-items: flex-start; height: 5vh;">
+    <a href="{% url 'listar_manutencoes' %}" class="action-link">Voltar</a>
+</div>
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<div class="container mt-5">
+    <h2 class="text-center">Editar Manutenção Preventiva</h2>
+    <form method="post" enctype="multipart/form-data" id="manutencaoForm">
+        {% csrf_token %}
+
+        <input type="hidden" name="pecas_quantidade" id="pecas-quantidade-hidden" value="">
+
+        <div class="mb-3">
+            <label for="equipamento-display">Equipamento:</label>
+            <input type="text" id="equipamento-display" class="form-control" value="{{ manutencao.equipamento.nome }} - {{ manutencao.equipamento.tag }}" readonly>
+        </div>
+
+        <div style="display: none;">
+            {{ form.equipamento }}
+            {{ form.pecas }}
+        </div>
+
+        <table>
+            <!-- Primeira linha  -->
+            <tr>
+                <td>
+                    <div class="mb-3">
+                        {{ form.descricao.label_tag }}
+                        {{ form.descricao }}
+                        {% if form.descricao.errors %}
+                            <div class="error-message">{{ form.descricao.errors }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="mb-3">
+                        {{ form.tipo_calculo.label_tag }}
+                        {{ form.tipo_calculo }}
+                        {% if form.tipo_calculo.errors %}
+                            <div class="error-message">{{ form.tipo_calculo.errors }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="mb-3">
+                        {{ form.requer_parada.label_tag }}
+                        {{ form.requer_parada }}
+                        {% if form.requer_parada.errors %}
+                            <div class="error-message">{{ form.requer_parada.errors }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="mb-3">
+                        {{ form.duracao_estimada.label_tag }}
+                        {{ form.duracao_estimada }}
+                        {% if form.duracao_estimada.errors %}
+                            <div class="error-message">{{ form.duracao_estimada.errors }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="mb-3">
+                        {{ form.status.label_tag }}
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="error-message">{{ form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            </table>
+
+            <table>
+                <tr>
+                    <td>
+                        <div class="mb-3">
+                            {{ form.data_ultima_manutencao.label_tag }}
+                            {{ form.data_ultima_manutencao }}
+                            {% if form.data_ultima_manutencao.errors %}
+                                <div class="error-message">{{ form.data_ultima_manutencao.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="mb-3">
+                            {{ form.horimetro_atual.label_tag }}
+                            {{ form.horimetro_atual }}
+                            {% if form.horimetro_atual.errors %}
+                                <div class="error-message">{{ form.horimetro_atual.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    
+                    <td>
+                        <div class="mb-3">
+                            {{ form.media_horas.label_tag }}
+                            {{ form.media_horas }}
+                            {% if form.media_horas.errors %}
+                                <div class="error-message">{{ form.media_horas.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="mb-3">
+                            {{ form.horas_intervalo.label_tag }}
+                            {{ form.horas_intervalo }}
+                            {% if form.horas_intervalo.errors %}
+                                <div class="error-message">{{ form.horas_intervalo.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="mb-3">
+                            {{ form.periodo_meses.label_tag }}
+                            {{ form.periodo_meses }}
+                            {% if form.periodo_meses.errors %}
+                                <div class="error-message">{{ form.periodo_meses.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+    
+                <tr>
+                    <td>
+                        <div class="mb-3">
+                            {{ form.procedimentos.label_tag }}
+                            {{ form.procedimentos }}
+                            {% if form.procedimentos.errors %}
+                                <div class="error-message">{{ form.procedimentos.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            
+        <div class="mb-3">
+            <h4>Peças Selecionadas:</h4>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Quantidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="selected-parts-table">
+                    {% for peca in pecas_selecionadas %}
+                        <tr data-id="{{ peca.id }}">
+                            <td>{{ peca.descricao }}</td>
+                            <td>
+                                <input type="number" class="form-control part-quantity" 
+                                       name="quantity_{{ peca.id }}"
+                                       min="1" 
+                                       value="{{ peca.quantidade }}" 
+                                       style="width: 100px;">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm delete-part" 
+                                        data-id="{{ peca.id }}">
+                                    Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr id="no-parts-row"><td colspan="3">Nenhuma peça selecionada</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#partsModal">
+                Adicionar Peças
+            </button>
+        </div>
+    
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        <a href="{% url 'listar_manutencoes' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<!-- Modal para Adicionar Peças -->
+<div class="modal fade" id="partsModal" tabindex="-1" aria-labelledby="partsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="partsModalLabel">Gerenciar Peças</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="partsSearch" class="form-control mb-3" placeholder="Pesquisar por descrição ou código">
+                <ul id="partsList" class="list-group">
+                    {% for peca in pecas_disponiveis %}
+                    <li class="list-group-item part-list-item" 
+                        data-id="{{ peca.id }}" 
+                        data-descricao="{{ peca.descricao }}">
+                        {{ peca.descricao }}
+                        <div class="quantity-input">
+                            <input type="number" class="form-control part-quantity" 
+                                   min="1" value="1" style="width: 100px;">
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="selectPartsBtn">Atualizar Seleção</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do DOM
+    const partsModal = new bootstrap.Modal(document.getElementById('partsModal'));
+    const selectedPartsTable = document.getElementById('selected-parts-table');
+    const pecasQuantidadeHidden = document.getElementById('pecas-quantidade-hidden');
+    const partsSearchInput = document.getElementById('partsSearch');
+    const partsList = document.getElementById('partsList');
+    const selectPartsBtn = document.getElementById('selectPartsBtn');
+    let selectedParts = new Map();
+
+    // Add click handler for the button
+    document.querySelector('[data-bs-target="#partsModal"]').addEventListener('click', function() {
+        partsModal.show();
+    });
+
+    // Inicializar o mapa de peças com os dados existentes
+    document.querySelectorAll('#selected-parts-table tr[data-id]').forEach(row => {
+        const partId = row.getAttribute('data-id');
+        const quantity = row.querySelector('.part-quantity').value;
+        selectedParts.set(partId, {
+            descricao: row.querySelector('td:first-child').textContent,
+            quantity: parseInt(quantity)
+        });
+    });
+
+    // Atualizar campo oculto com dados das peças
+    function updateHiddenField() {
+        const partsQuantidade = Array.from(selectedParts.entries()).map(([id, data]) => 
+            `${id}:${data.quantity}`
+        );
+        pecasQuantidadeHidden.value = partsQuantidade.join(',');
+    }
+
+    // Event listener para alterações na quantidade
+    selectedPartsTable.addEventListener('change', function(event) {
+        if (event.target.classList.contains('part-quantity')) {
+            const row = event.target.closest('tr');
+            const partId = row.getAttribute('data-id');
+            const newQuantity = parseInt(event.target.value);
+            if (newQuantity > 0) {
+                const currentPart = selectedParts.get(partId);
+                selectedParts.set(partId, { 
+                    ...currentPart,
+                    quantity: newQuantity 
+                });
+                updateHiddenField();
+            }
+        }
+    });
+
+    // Event listener para excluir peças
+    selectedPartsTable.addEventListener('click', function(event) {
+        if (event.target.classList.contains('delete-part')) {
+            const row = event.target.closest('tr');
+            const partId = event.target.getAttribute('data-id');
+            selectedParts.delete(partId);
+            row.remove();
+            
+            if (selectedPartsTable.querySelectorAll('tr[data-id]').length === 0) {
+                const noPartsRow = document.createElement('tr');
+                noPartsRow.id = 'no-parts-row';
+                noPartsRow.innerHTML = '<td colspan="3">Nenhuma peça selecionada</td>';
+                selectedPartsTable.appendChild(noPartsRow);
+            }
+            
+            updateHiddenField();
+        }
+    });
+
+    // Pesquisar peças no modal
+    partsSearchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        Array.from(partsList.children).forEach(item => {
+            const descricao = item.getAttribute('data-descricao').toLowerCase();
+            item.style.display = descricao.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Selecionar/deselecionar peças no modal
+    partsList.addEventListener('click', function(event) {
+        if (event.target.classList.contains('part-quantity')) {
+            event.stopPropagation();
+            return;
+        }
+
+        const clickedItem = event.target.closest('.part-list-item');
+        if (clickedItem) {
+            clickedItem.classList.toggle('selected-part');
+            const quantityInput = clickedItem.querySelector('.quantity-input');
+            if (quantityInput) {
+                quantityInput.style.display = clickedItem.classList.contains('selected-part') ? 'block' : 'none';
+            }
+        }
+    });
+
+    // Adicionar peças selecionadas
+    selectPartsBtn.addEventListener('click', function() {
+        const selectedItems = partsList.querySelectorAll('.part-list-item.selected-part');
+        
+        // Remover a mensagem "Nenhuma peça selecionada" se existir
+        const noPartsRow = document.getElementById('no-parts-row');
+        if (noPartsRow) noPartsRow.remove();
+
+        selectedItems.forEach(item => {
+            const partId = item.getAttribute('data-id');
+            const partDescricao = item.getAttribute('data-descricao');
+            const quantidade = item.querySelector('.part-quantity').value;
+
+            // Atualizar o Map de peças selecionadas
+            selectedParts.set(partId, {
+                descricao: partDescricao,
+                quantity: parseInt(quantidade)
+            });
+
+            // Verificar se a peça já existe na tabela
+            let row = document.querySelector(`#selected-parts-table tr[data-id="${partId}"]`);
+            if (!row) {
+                // Criar nova linha se a peça não existir
+                row = document.createElement('tr');
+                row.setAttribute('data-id', partId);
+                row.innerHTML = `
+                    <td>${partDescricao}</td>
+                    <td>
+                        <input type="number" class="form-control part-quantity" 
+                               min="1" value="${quantidade}" style="width: 100px;">
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm delete-part" 
+                                data-id="${partId}">
+                            Excluir
+                        </button>
+                    </td>
+                `;
+                selectedPartsTable.appendChild(row);
+            } else {
+                // Atualizar quantidade se a peça já existir
+                row.querySelector('.part-quantity').value = quantidade;
+            }
+        });
+
+        updateHiddenField();
+        bootstrap.Modal.getInstance(document.getElementById('partsModal')).hide();
+        selectedItems.forEach(item => item.classList.remove('selected-part'));
+    });
+
+    // Inicializar o campo oculto com os dados existentes
+    updateHiddenField();
+});
+</script>
+
+{% endblock %}
