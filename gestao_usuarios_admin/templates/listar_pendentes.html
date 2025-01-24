@@ -1,0 +1,66 @@
+{% extends 'base.html' %}  <!-- Assumindo que você tem um template base -->
+
+{% block content %}
+<div class="container">
+
+    <div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
+        <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
+        <a href="{% url 'login' %}" class="action-link">Sair</a>
+     </div>
+    <h1>Gerenciamento de Usuários</h1>
+
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por nome ou email" value="{{ query }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-control">
+                    <option value="">Todos os Status</option>
+                    <option value="aprovados" {% if status == 'aprovados' %}selected{% endif %}>Aprovados</option>
+                    <option value="nao_aprovados" {% if status == 'nao_aprovados' %}selected{% endif %}>Não Aprovados</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+                <a href="{% url 'criar_usuario' %}" class="btn btn-success ml-2">Novo Usuário</a>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>Email</th>
+                <th>Grupo</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pendente in pendentes %}
+            <tr>
+                <td>{{ pendente.username }}</td>
+                <td>{{ pendente.email }}</td>
+                <td>{{ pendente.grupo }}</td>
+                <td>
+                    {% if pendente.is_approved %}
+                        <span class="badge badge-success">Aprovado</span>
+                    {% else %}
+                        <span class="badge badge-warning">Pendente</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'editar_usuario_pendente' pendente.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">Nenhum usuário encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

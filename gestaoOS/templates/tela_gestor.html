@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Tela gestor!{% endblock %}
+{% block content %}
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+    <div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
+        <!-- <div class="actions" style="display: flex; justify-content: center; align-items: center; height: 5vh;"> -->
+            <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
+            <a href="{% url 'criar_chamado' %}" class="action-link">Criar Novo Chamado</a>
+            <a href="{% url 'login' %}" class="action-link">Sair</a>
+    </div>
+
+    <!-- Insere uma linha em branco-->
+    <h1> </h1>
+
+    <table class="tabela-sem-divisoes">
+        <form method="get" action="{% url 'tela_inicial' %}">
+            <!-- Filtro 1: Status -->
+            <td>
+            </td>
+
+            <td>    
+                <!-- Filtro 4: Usuário -->
+                <div>
+                    <label for="usuario">Solicitante:</label>
+                    <input type="text" name="usuario" id="usuario" placeholder="Digite parte do nome">
+                </div>
+            </td>
+
+            <td> 
+            <div>
+                <label for="status">Status:</label>
+                <select name="status" id="status">
+                    <option value="pendente" selected>Pendente</option>
+                    <option value="em_andamento">Em Andamento</option>
+                    <option value="aguardando_peca">Aguardando peça</option>
+                    <option value="finalizado">Finalizado</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="" {% if request.GET.status == "" %}selected{% endif %}>Todos</option>
+                </select>
+            </div>
+            </td>
+
+            <td>    
+            <!-- Filtro 2: Técnico -->
+            <div>
+                <label for="tecnico">Técnico:</label>
+                <select name="tecnico" id="tecnico">
+                    <option value="">Todos</option>
+                    {% for tecnico in tecnicos %}
+                    <option value="{{ tecnico.id }}">{{ tecnico.get_full_name|default:tecnico.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            </td>
+            
+            <td>        
+            <!-- Filtro 3: Setor -->
+            <div>
+                <label for="setor">Setor:</label>
+                <select name="setor" id="setor">
+                    <option value="">Todos</option>
+                    {% for setor in setores %}
+                    <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            </td>
+                
+
+                
+            <td>    
+            <!-- Filtro 5: Título/Descrição -->
+            <div>
+                <label for="titulo_descricao">Título/Descrição:</label>
+                <input type="text" name="titulo_descricao" id="titulo_descricao" placeholder="Digite palavras-chave">
+            </div>
+            </td>
+
+            <td>    
+                <!-- Filtro 4: Usuário -->
+                <div>
+                    <label for="equipamento">Equipamento:</label>
+                    <input type="text" name="equipamento" id="equipamento" placeholder="equipamento">
+                </div>
+            </td>
+
+              
+            <td>    
+            <!-- Filtro 6: Data -->
+            <div>
+                <label for="data">Ordenar por Data:</label>
+                <select name="data" id="data">
+                    <option value="">Mais recente</option>
+                    <option value="mais_antigo">Mais antigo</option>
+                </select>
+            </div>
+            </td>
+                
+            <td>    
+            <!-- Botão "Filtrar" -->
+            <div style="grid-column: span 6; text-align: center;">
+                <button type="submit" class="btn-filter">Filtrar</button>
+            </div>
+            </td>
+
+            <td>
+            </td>
+        </form>
+    </table>
+
+    <!-- Tabela de Chamados -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>OS nº</th>
+                <th>Solicitante</th>
+                <th>Status</th>
+                <th>Técnico</th>
+                <th>Setor</th>
+                <th>Título</th>
+                <th>Descricao</th>
+                <th>Tipo de Manutenção</th>
+                <th>TAG</th>
+                <th>Equipamento</th>
+                <th>Data da Solicitação</th>
+                <th>Imagem</th>
+                <th>Editar/Excluir</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chamado in chamados_por_solicitante %}
+                <tr>
+                    <td>{{ chamado.id }}</td>
+                    <td>{{ chamado.usuario }}</td>
+                    <td>{{ chamado.status }}</td>
+                    <td>
+                        {% if chamado.tecnico %}
+                            {{ chamado.tecnico.get_full_name|default:chamado.tecnico.username }}
+                        {% else %}
+                            Não Atribuído
+                        {% endif %}
+                    </td>
+                    <td>{{ chamado.setor }}</td>
+                    <td>{{ chamado.titulo }}</td>
+                    <td>{{ chamado.descricao }}</td>
+                    <td>{{ chamado.tipo_manutencao }}</td>
+                    <td>{{ chamado.equipamento.tag }}</td>
+                    <td>{{ chamado.equipamento }}</td>
+                    <td><small>{{ chamado.data_criacao|date:"d/m/Y H:i" }}</small></td>
+                    <td>
+                        {% if chamado.foto_url %}
+                            <a href="{{ request.scheme }}://{{ request.get_host }}{{ chamado.foto_url }}" target="_blank">
+                                <img src="{{ request.scheme }}://{{ request.get_host }}{{ chamado.foto_url }}" style="width: 50px; height: 50px; object-fit: cover;">
+                            </a>
+                        {% else %}
+                            <span style="color: #999; font-style: italic;">Sem Imagem</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'gerenciar_acoes' chamado.id %}" class="btn btn-info mt-3">
+                            <img src="{% static 'images/edit_icon.png' %}" alt="Editar" style="width: 30px; height: 30px;"></i>
+                        </a>
+                        <a href="{% url 'excluir_chamado' chamado.id %}" onclick="return confirm('Tem certeza que deseja excluir este chamado?');">
+                            <img src="{% static 'images/delete_icon.png' %}" alt="Excluir" style="width: 20px; height: 20px;"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Insere uma linha em branco antes do final da página -->
+    <h1> </h1>
+    
+    <script>
+        $(document).ready(function(){
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
+
+    // Atualiza a URL com os valores dos filtros selecionados
+    function updateFilters() {
+        const params = new URLSearchParams(window.location.search);
+
+        // Obtém os valores dos filtros
+        const status = document.getElementById('status').value;
+        const tecnico = document.getElementById('tecnico').value;
+        const setor = document.getElementById('setor').value;
+        const usuario = document.getElementById('usuario').value;
+        const tituloDescricao = document.getElementById('titulo_descricao').value;
+        const data = document.getElementById('data').value;
+
+        // Atualiza os parâmetros na URL
+        params.set('status', status);
+        params.set('tecnico', tecnico);
+        params.set('setor', setor);
+        params.set('usuario', usuario);
+        params.set('titulo_descricao', tituloDescricao);
+        params.set('data', data);
+
+        // Atualiza a URL no navegador
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+    }
+
+    // Adiciona eventos para atualizar os filtros ao interagir com os elementos
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('status').addEventListener('change', updateFilters);
+        document.getElementById('tecnico').addEventListener('change', updateFilters);
+        document.getElementById('setor').addEventListener('change', updateFilters);
+        document.getElementById('usuario').addEventListener('input', updateFilters);
+        document.getElementById('titulo_descricao').addEventListener('input', updateFilters);
+        document.getElementById('data').addEventListener('change', updateFilters);
+    });
+
+    document.querySelector('button[type="submit"]').addEventListener('click', () => {
+        const form = document.querySelector('form');
+        form.submit();
+    });
+
+    </script>
+
+{% endblock %}

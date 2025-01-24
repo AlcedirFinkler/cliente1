@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Tela técnico!{% endblock %}
+{% block content %}
+
+
+<div class="container">
+    <div class="actions" style="display: flex; justify-content: center;">  
+        <a href="{% url 'criar_chamado' %}" style="margin-right: 10px;">Criar novo chamado</a>
+        <a href="{% url 'login' %}">Sair</a>
+    </div>  
+
+    <div class="header-filters">
+        <form method="get" action="">
+            <button type="submit" name="tipo" value="recebidos" 
+                    class="toggle-button {% if request.GET.tipo == 'recebidos' or not request.GET.tipo %}selected{% else %}deselected{% endif %}">
+                    Chamados Recebidos
+            </button>
+            <button type="submit" name="tipo" value="realizados" 
+                    class="toggle-button {% if request.GET.tipo == 'realizados' %}selected{% else %}deselected{% endif %}">
+                    Chamados Realizados
+            </button>
+        </form>
+    </div>  
+
+    <div class="header-filters">
+        <form method="get" action="" id="ordenar-form">
+            <select name="ordenar" id="ordenar-select" onchange="updateUrl()">
+                <option value="">Ordenar por</option>
+                <option value="mais_recente" {% if request.GET.ordenar == "mais_recente" %}selected{% endif %}>Mais Recentes</option>
+                <option value="mais_antigo" {% if request.GET.ordenar == "mais_antigo" %}selected{% endif %}>Mais Antigos</option>
+                <option value="pendente" {% if request.GET.ordenar == "pendente" %}selected{% endif %}>Pendentes</option>
+                <option value="em_andamento" {% if request.GET.ordenar == "em_andamento" %}selected{% endif %}>Em Andamento</option>
+                <option value="finalizado" {% if request.GET.ordenar == "finalizado" %}selected{% endif %}>Finalizados</option>
+                <option value="concluido" {% if request.GET.ordenar == "concluido" %}selected{% endif %}>Concluídos</option>
+            </select>
+        </form>
+    </div>
+
+
+    <ul class="chamados-list">
+        {% for chamado in chamados %}
+            <li class="chamado-item">
+                <div class="chamado-grid">
+                    <!-- Primeira Coluna -->
+                    <div class="coluna-1">
+                        <strong>Número da OS:</strong> {{ chamado.id }}
+                        <p>Título: {{ chamado.titulo }}</p>
+                        <p>Status: {{ chamado.status }}</p>                         
+                        <p>Setor: {{ chamado.setor }}</p>
+                        <p>Tipo de Manutenção: {{ chamado.get_tipo_manutencao_display }}</p>
+                        <p><small>Aberto em: {{ chamado.data_criacao|date:"d/m/Y H:i" }}</small></p>                            
+                        {% if tipo == 'recebidos' %}
+                            <p>Solicitante:{{ chamado.usuario.username }}</p>
+                        {% endif %}
+                        {% if chamado.diagnostico %}
+                            <p>Diagnóstico: {{ chamado.diagnostico }}</p>
+                        {% endif %}
+                        {% if chamado.solucao %}
+                            <p>Solução: {{ chamado.solucao }}</p>
+                        {% endif %}
+                        {% if chamado.causa_raiz %}
+                            <p>Causa Raiz: {{ chamado.causa_raiz }}</p>
+                        {% endif %}
+                    </div>
+    
+                    <!-- Segunda Coluna -->
+                    <div class="coluna-2">
+                        <p>Descrição: {{ chamado.descricao }}</p>
+                        {% if chamado.foto %}
+                            <div class="mt-2">
+                                <a href="{{ chamado.foto.url }}" target="_blank" class="btn btn-image">
+                                    <!-- <img src="/static/icons/image-icon.png" class="icon" alt="Ver Imagem"> -->
+                                    <i class="bi bi-image"></i> Ver Imagem
+                                </a>
+                            </div>
+                        {% else %}
+                            <p><em>Sem imagem anexada.</em></p>
+                        {% endif %}
+                        {% if chamado.status == 'em_andamento' %}
+                            <div class="action-buttons">
+                                <a href="{% url 'gerenciar_acoes' chamado.id %}" class="btn btn-info mt-3">
+                                    <img src="{% static 'images/edit_icon.png' %}" alt="Editar" style="width: 30px; height: 30px;"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+        {% empty %}
+            <li>
+                <p>Você ainda não abriu nenhum chamado.</p>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    function updateUrl() {
+        const tipo = new URLSearchParams(window.location.search).get('tipo');
+        const ordenar = document.getElementById('ordenar-select').value;
+
+        let newUrl = new URL(window.location);
+        newUrl.searchParams.set('tipo', tipo); // mantém o tipo atual
+        newUrl.searchParams.set('ordenar', ordenar); // aplica o novo valor de ordenação
+
+        window.location.href = newUrl.toString(); // redireciona com os novos parâmetros
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Tela solicitante!{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="actions">  
+            <a href="{% url 'criar_chamado' %}" style="margin-right: 10px;">Criar novo chamado</a>
+            <a href="{% url 'login' %}">Sair</a>
+        </div>  
+
+
+        <div class="header-filters">
+            <form method="get" action="">
+                <select name="ordenar" onchange="this.form.submit()">
+                    <option value="">Ordenar por</option>
+                    <option value="mais_recente">Mais Recentes</option>
+                    <option value="mais_antigo">Mais Antigos</option>
+                    <option value="pendente">Pendentes</option>
+                    <option value="em_andamento">Em Andamento</option>
+                    <option value="finalizado">Finalizado</option>
+                    <option value="concluido">Concluídos</option>
+                </select>
+            </form>
+        </div>
+
+        <ul class="chamados-list">
+                {% for item in chamados_com_acoes %}
+                    <li>
+                        <div class="chamado-grid">
+                            <!-- Primeira Coluna -->
+                            <div class="coluna-1">
+                                <strong>Número da OS:</strong> {{ item.chamado.id }}
+                                <p>Título: {{ item.chamado.titulo }}</p>
+                                <p>Status: {{ item.chamado.status }}</p>
+                                <p>Setor: {{ item.chamado.setor }}</p>
+                                <p>Técnico: {{ item.chamado.tecnico }}</p>
+                                <p>Tipo de Manutenção: {{ item.chamado.get_tipo_manutencao_display }}</p> 
+                                {% if item.chamado.diagnostico %}                          
+                                    <p>Diagnóstico: {{ item.chamado.diagnostico }}</p>
+                                    <p>Solução: {{ item.chamado.solucao }}</p>
+                                    <p>Causa Raiz: {{ item.chamado.causa_raiz }}</p> 
+                                {% endif %}                         
+                            </div>
+                    
+                            <!-- Segunda Coluna -->
+                            <div class="coluna-2">
+                                <p><small>Aberto em: {{ item.chamado.data_criacao|date:"d/m/Y H:i" }}</small></p>                
+                                {% if item.chamado.foto and item.chamado.foto.url %}
+                                <div class="mt-2">
+                                    <a href="{{ item.chamado.foto.url }}" target="_blank" class="btn btn-image">
+                                        <!-- <img src="/static/icons/image-icon.png" class="icon" alt="Ver Imagem"> -->
+                                        <i class="bi bi-image"></i> Ver Imagem
+                                    </a>
+                                </div>
+                                {% else %}
+                                    <p><em>Sem imagem anexada.</em></p>
+                                {% endif %}
+                    
+                                
+                                <p>Descrição: {{ item.chamado.descricao }}</p>
+                                {% if item.acoes %}  <!-- Verifica se ações não está vazio -->
+                                <button class="toggle-actions" onclick="toggleActions(this)">Ações</button>
+                                <div class="actions-container" style="display: none;">
+                                    <h4>Ações</h4>
+                                    <ul>
+                                        {% for acao in item.acoes %}
+                                            <li>
+                                                <p>{{ acao.descricao }}</p>  <!-- Corrigido para usar acao.descricao, não chamado.descricao -->
+                                                <p><small>Registrado em: {{ acao.data_criacao|date:"d/m/Y H:i" }}</small></p>
+                                            </li>
+                                        {% empty %}
+                                            <li><em>Sem ações registradas.</em></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li>
+                        <p>Você ainda não abriu nenhum chamado.</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        
+    </div>
+
+    <script>
+        function toggleActions(button) {
+            // Localiza o contêiner de ações próximo ao botão clicado
+            const actionsContainer = button.nextElementSibling;
+    
+            // Verifica se o contêiner está visível
+            if (actionsContainer.style.display === "none") {
+                actionsContainer.style.display = "block"; // Exibe as ações
+                button.textContent = "Ocultar Ações"; // Altera o texto do botão
+            } else {
+                actionsContainer.style.display = "none"; // Oculta as ações
+                button.textContent = "Ações"; // Altera o texto do botão
+            }
+        }
+    </script>
+
+{% endblock %}
