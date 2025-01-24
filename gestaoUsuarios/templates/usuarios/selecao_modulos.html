@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #003366;
+            color: white;
+            padding: 10px 20px;
+        }
+        .header img {
+            width: 50px;
+            height: 50px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+        .module {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .module:hover {
+            transform: scale(1.05);
+        }
+        .module.disabled {
+            background-color: #ccc;
+            color: #666;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 20px; /* Define o espaçamento horizontal entre os botões */
+            align-items: center; /* Centraliza os botões verticalmente */
+        }
+
+        .actions a {
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 15%;
+            justify-content: center; /* Centraliza os botões horizontalmente */
+        }
+
+        .actions a:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .actions a {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <div class="header">
+        <img src="{% static 'images/logo.png' %}" alt="Logo">
+        <h1>Bem-vindo(a), {{ request.user.username }} a tela de seleção de módulos!</h1>
+    </div>
+
+    <div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
+        <a href="{% url 'login' %}" class="action-link">Sair</a>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="container">
+        {% for module in modules %}
+        <a href="{{ module.url }}" class="module {% if not module.enabled %}disabled{% endif %}">
+            {{ module.name }}
+        </a>
+        {% endfor %}
+    </div>
+</body>
+</html>

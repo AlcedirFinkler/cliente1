@@ -1,0 +1,73 @@
+<!-- reports/templates/reports/relatorios.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Gerador de Relatórios</h1>
+    
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Equipamentos</h5>
+                    <a href="{% url 'relatorio_equipamentos' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Peças</h5>
+                    <a href="{% url 'relatorio_pecas' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chamados por Status</h5>
+                    <a href="{% url 'relatorio_chamados_status' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chamados por Técnico</h5>
+                    <a href="{% url 'relatorio_chamados_tecnico' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chamados por Equipamento</h5>
+                    <a href="{% url 'relatorio_chamados_equipamento' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Manutenções Próximas</h5>
+                    <a href="{% url 'relatorio_manutencoes_proximas' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Peças para Manutenções</h5>
+                    <a href="{% url 'relatorio_pecas_manutencoes' %}" class="btn btn-primary">Gerar PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            text-align: center; /* Centraliza o texto */
+        }
+        .content {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <p><a href="{% url 'login' %}">Voltar para o Login</a></p>
+    <h1>Bem-vindo(a), {{ request.user.username }}!</h1>
+    <p>Página específica para gestores de manutenção!</p>
+</body>
+</html>

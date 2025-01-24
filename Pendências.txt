@@ -1,0 +1,48 @@
+Na app de gestão de usuários: 
+1 - Na tela de cadastro de novos usuários, inserir mensagem de alerta caso e-mail for inválido. 
+  - Feito
+2 - Inserir campo para confirmação de senha.
+  - Feito
+3 - Campo status e notificações: Para rastrear alterações de status, considere criar um histórico de mudanças. Você pode usar o pacote Django Simple History ou implementar manualmente um modelo de histórico.
+4 - Proteção contra senha força-bruta;
+  - Feito
+5 - Criar módulo na tela do gestor para aprovação de novos usuários (trazer do ADMIM)
+  - Criada, porém pendente configurar modificação de senha.  
+6 - Avaliar o interesse de criar módulo na tela do gestor para criação de novos setores ou manter isso apenas na tela do ADMIN.
+
+Na app de gestaoOS
+1 - Revisar todas funções na VIEW para depender o nível de usuário gestor; 
+2 - Para Gestor, incluir campo "CLASSE" e permitir classificar por classe. 
+3 - Para Técnico, revisar inclusão de colaboradores. Observar para que número de horas individuais não ultrapasse número de horas totais. 
+4 - Na finalização do chamado, verificar possibilidade de incluir custos com mão de obra terceirizada. 
+
+Na app cadEstoque
+1 - Revisar todas funções na VIEW para depender o nível de usuário gestor; 
+2 - Implementar alertas/indicadores de estoque em nível regular/alerta/crítico. 
+3 - Pensar em como implementar algorítmo para alertar nível estoque em função das preventivas. 
+4 - Garantir que no momento do cadastro não possa ser cadastrado duas peças com o mesmo código. 
+
+Na aba Manutenção preventiva
+1 - Revisar Cálculo automático da próxima manutenção com relação ao número de horas.
+2 - Falta de campos para cálculo automático de indicadores de manutenção 
+3 - Poderia incluir campos para registro de tempo de parada real 
+
+Na aba de gestão de estoque
+1 - Verificar possibilidade de dar entrada automática em notafiscal por meio do código de barras e consulta a receita. 
+2 - Verificar possibilidade de implementação de um sistema de movimentação de estoque
+3 - Verificar possibilidade de implementar um sistema entre técnico e estorquista para gestão de requisições de materiais
+
+Na app Relatórios:
+1 - OSs
+   ✓ OSs por equipamento e por status. 
+   ✓ OSs por técnicos e por status 
+   ✓ OS por solicitante
+2 - Peças 
+   ✓ Total cadastrada com quantidade e valores;
+   ✓ Peças abaixo do estoque mínimo por fornecedor;
+   ✓ Peças previstas para próximos 60 dias em função das preventivas. 
+3 - Fornecedor 
+   ✓ Fornecedor cadastro 
+4 - Equipamento 
+   ✓ Equipamento cadastrado por setor 
+5 - Indicadores de manutenção

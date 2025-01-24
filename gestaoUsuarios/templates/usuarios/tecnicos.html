@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Tecnicos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            text-align: center; /* Centraliza o texto */
+        }
+        .content {
+            text-align: center;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 20px; /* Define o espaçamento horizontal entre os botões */
+            align-items: center; /* Centraliza os botões verticalmente */
+        }
+
+        .actions a {
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-align: center;
+            width: 30%;
+            justify-content: center; /* Centraliza os botões horizontalmente */
+        }
+
+        .actions a:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .actions a {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <p><a href="{% url 'login' %}">Voltar para o Login</a></p>
+    <h1>Bem-vindo(a), {{ request.user.username }}!</h1>
+    <p>Página específica para técnicos!</p>
+</body>
+</html>
