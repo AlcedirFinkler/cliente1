@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gestão de Fornecedores{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+<div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
+   <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
+   <a href="{% url 'CriaFornecedor' %}" class="action-link">Cadastrar Novo Fornecedor</a>
+   <a href="{% url 'login' %}" class="action-link">Sair</a>
+</div>
+
+<!-- Formulário de filtros -->
+<table class="tabela-sem-divisoes", style="border: none">
+   <form method="get" action="{% url 'CadFornecedor' %}">
+       <!-- Filtro: Nome do Fornecedor -->
+       <td style="width: 25%">
+           <div>
+               <label for="fornecedor">Nome do Fornecedor:</label>
+               <input type="text" name="fornecedor" id="fornecedor" placeholder="Digite o nome do fornecedor">
+           </div>
+       </td>
+
+        <!-- Filtro: Telefone -->
+        <td style="width: 25%">
+            <div>
+                <label for="telefone">Telefone:</label>
+                <input type="text" name="telefone" id="telefone" placeholder="Digite o telefone">
+            </div>
+        </td>
+
+       <!-- Filtro: Email -->
+       <td style="width: 25%">
+           <div>
+               <label for="email">Email:</label>
+               <input type="text" name="email" id="email" placeholder="Digite o email">
+           </div>
+       </td>
+
+
+
+       <!-- Botão "Filtrar" -->
+       <td>
+           <div style="text-align: center;">
+               <button type="submit" class="btn-filter">Filtrar</button>
+           </div>
+       </td>
+   </form>
+</table>
+
+<!-- Tabela de Fornecedores -->
+<table border="1">
+   <thead>
+       <tr>
+           <th style="width: 25%">Nome do Fornecedor</th>
+           <th style="width: 20%">Telefone</th>
+           <th style="width: 25%">Site</th>
+           <th style="width: 20%">Email</th>
+           <th style="width: 10%">Ações</th>
+       </tr>
+   </thead>
+   <tbody>
+       {% for fornecedor in fornecedores %}
+           <tr>
+               <td>{{ fornecedor.fornecedor }}</td>
+               <td>{{ fornecedor.fornecedor_fone }}</td>
+               <td>{{ fornecedor.fornecedor_site }}</td>
+               <td>{{ fornecedor.fornecedor_email }}</td>
+               <td>
+                   <a href="{% url 'editar_fornecedor' fornecedor.id %}">
+                       <img src="{% static 'images/edit_icon.png' %}" alt="Editar" style="width: 20px; height: 20px;">
+                   </a>
+                   <a href="{% url 'excluir_fornecedor' fornecedor.id %}">
+                    <img src="{% static 'images/delete_icon.png' %}" alt="Excluir" style="width: 20px; height: 20px;">
+                </a>
+               </td>
+           </tr>
+       {% endfor %}
+   </tbody>
+</table>
+
+
+{% endblock %}
