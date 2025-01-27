@@ -1,19 +1,42 @@
 {% extends 'base.html' %}  <!-- Assumindo que você tem um template base -->
 
 {% block content %}
-<div class="container">
 
-    <div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
-        <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
-        <a href="{% url 'login' %}" class="action-link">Sair</a>
-     </div>
-    <h1>Gerenciamento de Usuários</h1>
 
-    <form method="get" class="mb-4">
-        <div class="row">
-            <div class="col-md-6">
-                <input type="text" name="q" class="form-control" placeholder="Buscar por nome ou email" value="{{ query }}">
+<div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
+    <a href="{% url 'criar_usuario' %}" class="action-link">Novo Usuário</a>
+    <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
+    <a href="{% url 'login' %}" class="action-link">Sair</a>
+    </div>
+<h1>Gerenciamento de Usuários</h1>
+
+<table class="tabela-sem-divisoes", style="border: none">
+    <form method="get" action="{% url 'CadFornecedor' %}">
+        <!-- Filtro: Nome do Fornecedor -->
+        <td style="width: 25%">
+            <div>
+                <label for="fornecedor">Nome do usuário:</label>
+                <input type="text" name="usuario" id="usuario" placeholder="Digite o nome do usuário">
             </div>
+        </td>
+    
+            <!-- Filtro: Telefone -->
+            <td style="width: 20%">
+                <div>
+                    <label for="telefone">Telefone:</label>
+                    <input type="text" name="telefone" id="telefone" placeholder="Digite o telefone">
+                </div>
+            </td>
+    
+        <!-- Filtro: Email -->
+        <td style="width: 25%">
+            <div>
+                <label for="email">Email:</label>
+                <input type="text" name="email" id="email" placeholder="Digite o email">
+            </div>
+        </td>
+    
+        <td style="width: 20%">
             <div class="col-md-3">
                 <select name="status" class="form-control">
                     <option value="">Todos os Status</option>
@@ -21,46 +44,50 @@
                     <option value="nao_aprovados" {% if status == 'nao_aprovados' %}selected{% endif %}>Não Aprovados</option>
                 </select>
             </div>
-            <div class="col-md-3">
+        </td>
+    
+        <!-- Botão "Filtrar" -->
+        <td style="width: 10%">
+            <div style="text-align: center;">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
-                <a href="{% url 'criar_usuario' %}" class="btn btn-success ml-2">Novo Usuário</a>
             </div>
-        </div>
+        </td>
     </form>
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Usuário</th>
-                <th>Email</th>
-                <th>Grupo</th>
-                <th>Status</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pendente in pendentes %}
-            <tr>
-                <td>{{ pendente.username }}</td>
-                <td>{{ pendente.email }}</td>
-                <td>{{ pendente.grupo }}</td>
-                <td>
-                    {% if pendente.is_approved %}
-                        <span class="badge badge-success">Aprovado</span>
-                    {% else %}
-                        <span class="badge badge-warning">Pendente</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'editar_usuario_pendente' pendente.pk %}" class="btn btn-sm btn-primary">Editar</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">Nenhum usuário encontrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
     </table>
 </div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Usuário</th>
+            <th>Email</th>
+            <th>Grupo</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pendente in pendentes %}
+        <tr>
+            <td>{{ pendente.username }}</td>
+            <td>{{ pendente.email }}</td>
+            <td>{{ pendente.grupo }}</td>
+            <td>
+                {% if pendente.is_approved %}
+                    <span class="badge badge-success">Aprovado</span>
+                {% else %}
+                    <span class="badge badge-warning">Pendente</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'editar_usuario_pendente' pendente.pk %}" class="btn btn-sm btn-primary">Editar</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Nenhum usuário encontrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
