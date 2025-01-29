@@ -27,7 +27,6 @@ class ManutencaoPreventiva(models.Model):
     data_ultima_manutencao = models.DateField(null=True, blank=True)
     data_proxima_manutencao = models.DateField(null=True, blank=True)
     horimetro_atual = models.FloatField(null=True, blank=True)
-    media_horas = models.FloatField(null=True, blank=True)
     periodo_meses = models.IntegerField(null=True, blank=True)
     horas_intervalo = models.FloatField(null=True, blank=True)
     procedimentos = models.FileField(upload_to='procedimento_pdfs/', blank=True, null=True)

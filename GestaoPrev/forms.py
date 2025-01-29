@@ -37,11 +37,10 @@ class ManutencaoPreventivaForm(forms.ModelForm):
         fields = [
             'equipamento', 'descricao', 'tipo_calculo',
             'requer_parada', 'data_ultima_manutencao', 'horimetro_atual',
-            'periodo_meses', 'horas_intervalo', 'procedimentos', 'pecas', 'duracao_estimada', 'media_horas', 'duracao_real', 'status'
+            'periodo_meses', 'horas_intervalo', 'procedimentos', 'pecas', 'duracao_estimada', 'duracao_real', 'status'
         ]
         labels = {
             'duracao_estimada': 'Duração em horas:',
-            'media_horas': 'Média de horas semanais:',
         }
         widgets = {
             'descricao': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
@@ -51,7 +50,6 @@ class ManutencaoPreventivaForm(forms.ModelForm):
             'periodo_meses': forms.NumberInput(attrs={'class': 'form-control'}),
             'horas_intervalo': forms.NumberInput(attrs={'class': 'form-control'}),
             'duracao_estimada': forms.NumberInput(attrs={'class': 'form-control'}), 
-            'media_horas': forms.NumberInput(attrs={'class': 'form-control'}),
             'duracao_real': forms.NumberInput(attrs={'class': 'form-control'}),
         }
     

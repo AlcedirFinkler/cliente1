@@ -1,6 +1,10 @@
 # models.py from app CadEquip
 
 from django.db import models
+from django.utils import timezone
+from datetime import datetime
+
+
 
 class Setor(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -70,6 +74,36 @@ class Equipamento(models.Model):
         choices=CLASSIFICACAO,
         default='c',
     )
+    horimetro_atual = models.FloatField(default=0, help_text="Horas totais de operação do equipamento")
+    ultima_atualizacao = models.DateTimeField(null=True, blank=True)
+
+    def atualizar_horimetro(self, novas_horas):
+        """
+        Atualiza o horímetro do equipamento e mantém o histórico mensal de horas trabalhadas.
+        """
+        agora = timezone.now()
+        ano_atual = agora.year
+        mes_atual = agora.month
+
+        if self.ultima_atualizacao:
+            ultima_data = self.ultima_atualizacao
+            ultimo_mes = ultima_data.month
+            ultimo_ano = ultima_data.year
+
+            # Caso tenha mudado o mês, calcula o total de horas do mês anterior
+            if ultimo_ano != ano_atual or ultimo_mes != mes_atual:
+                horas_mes_anterior = novas_horas - self.horimetro_atual
+                HistoricoHorasMensais.objects.create(
+                    equipamento=self,
+                    ano=ultimo_ano,
+                    mes=ultimo_mes,
+                    horas_trabalhadas=horas_mes_anterior
+                )
+
+        # Atualiza os dados do horímetro
+        self.horimetro_atual = novas_horas
+        self.ultima_atualizacao = agora
+        self.save()
 
     def __str__(self):
         return f"{self.nome} ({self.tag}) - {self.setor.nome} - {self.fornecedor.fornecedor if self.fornecedor else 'Sem fornecedor'}"
@@ -77,3 +111,19 @@ class Equipamento(models.Model):
     class Meta:
         verbose_name = 'Equipamento'
         verbose_name_plural = 'Equipamentos'
+
+class HistoricoHorasMensais(models.Model):
+    equipamento = models.ForeignKey(Equipamento, on_delete=models.CASCADE, related_name='historico_horas_mensais')
+    ano = models.IntegerField(help_text="Ano do registro")
+    mes = models.IntegerField(help_text="Mês do registro (1 a 12)")
+    horas_trabalhadas = models.FloatField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['equipamento', 'ano', 'mes']
+        ordering = ['-ano', '-mes']
+
+    def __str__(self):
+        return f"{self.equipamento.tag} - {self.mes}/{self.ano} - Horas: {self.horas_trabalhadas}"
+

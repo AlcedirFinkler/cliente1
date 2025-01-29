@@ -188,7 +188,7 @@ def modulos(request):
             {"name": "Controle Estoque", "url": reverse('cadEstoque'), "enabled": True},
             {"name": "Cadastro Equipamentos", "url": reverse('CadEquip'), "enabled": True},
             {"name": "Cadastro Fornecedores", "url": reverse('CadFornecedor'), "enabled": True},
-            {"name": "Relatórios", "url": reverse('relatorio_equipamentos'), "enabled": True},  
+            {"name": "Relatórios", "url": reverse('relatorios_index'), "enabled": True},  
             {"name": "Gestão Usuários", "url": reverse('listar_usuarios_pendentes'), "enabled": True},
             # Adicione até o total de 12 módulos
         ]
@@ -201,7 +201,7 @@ def modulos(request):
             {"name": "Controle Estoque", "url": reverse('cadEstoque'), "enabled": True},
             {"name": "Cadastro Equipamentos", "url": reverse('CadEquip'), "enabled": False},
             {"name": "Cadastro Fornecedores", "url": reverse('CadFornecedor'), "enabled": True},
-            {"name": "Relatórios", "url": "/modulo5/", "enabled": False},
+            {"name": "Relatórios", "url": reverse('relatorios_index'), "enabled": True},
             {"name": "Gestão Usuários", "url": "/modulo6/", "enabled": False},
             # Adicione até o total de 12 módulos
         ]
