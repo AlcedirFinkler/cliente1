@@ -13,27 +13,30 @@ def is_gestor(user):
 @login_required
 @user_passes_test(is_gestor)
 def listar_usuarios_pendentes(request):
-    query = request.GET.get('q', '')
-    status = request.GET.get('status', '')
+    usuarios_pendentes = CadastroPendente.objects.all()
 
-    pendentes = CadastroPendente.objects.all()
-    
-    if query:
-        pendentes = pendentes.filter(
-            Q(username__icontains=query) | 
-            Q(email__icontains=query)
-        )
-    
-    if status == 'aprovados':
-        pendentes = pendentes.filter(is_approved=True)
-    elif status == 'nao_aprovados':
-        pendentes = pendentes.filter(is_approved=False)
+    usuario = request.GET.get('usuario')
+    email = request.GET.get('email')
+    status = request.GET.get('status')
 
-    return render(request, 'listar_pendentes.html', {
-        'pendentes': pendentes,
-        'query': query,
-        'status': status
-    })
+    if usuario:
+        usuarios_pendentes = usuarios_pendentes.filter(username__icontains=usuario)
+    if email:
+        usuarios_pendentes = usuarios_pendentes.filter(email__icontains=email)
+    if status:
+        if status == 'aprovados':
+            usuarios_pendentes = usuarios_pendentes.filter(is_approved=True)
+        elif status == 'nao_aprovados':
+            usuarios_pendentes = usuarios_pendentes.filter(is_approved=False)
+
+
+    context = {
+        'pendentes': usuarios_pendentes,
+        'usuario': usuario,
+        'email': email,
+        'status': status,
+    }
+    return render(request, 'listar_pendentes.html', context)
 
 @login_required
 @user_passes_test(is_gestor)
@@ -71,6 +74,7 @@ def editar_usuario_pendente(request, pk):
 @user_passes_test(is_gestor)
 def criar_usuario(request):
     if request.method == 'POST':
+        print("hello1")
         form = NovoUsuarioForm(request.POST)
         if form.is_valid():
             try:
@@ -79,7 +83,7 @@ def criar_usuario(request):
                 return redirect('listar_usuarios_pendentes')
             except Exception as e:
                 messages.error(request, f'Erro ao criar usuário: {str(e)}')
-    else:
+    else:    
         form = NovoUsuarioForm()
     
     return render(request, 'criar_usuario.html', {'form': form})

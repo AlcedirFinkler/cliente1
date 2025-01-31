@@ -3,145 +3,168 @@
 {% block title %}Editar Fornecedor{% endblock %}
 {% block content %}
 
+<!-- Include Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
-    table {
-        border-collapse: collapse;
+    .form-container .actions {
+        display: flex;
+        align-items: flex-start;
+        height: 5vh;
     }
-    table td, table th {
+    .form-container .action-link {
+        margin-bottom: 20px;
+    }
+    .form-container table {
+        width: 100%;
+    }
+    .form-container table td, .form-container table th {
         border: none;
+    }
+    .custom-button {
+        background-color: #3C93DA;
+        border: none;
+        color: white;
+        padding: 10px 24px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    .sidenav a, .sidenav h1 {
+        all: unset;
+        display: block;
+        text-decoration: none;
+        font-family: 'Roboto', sans-serif;
+    }
+    .sidenav a {
+        padding-left: 32px;
+        padding-bottom: 5px;
+        font-size: 20px;
+        color: #818181;
+    }
+    .sidenav h1 {
+        padding-top: 14px;
+        padding-bottom: 11px;
+        padding-left: 32px;
+        font-size: 30px;
+        color: #c4c4c4;
+        font-weight: bold;
+    }
+    
+    .sidenav .bottom-links {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        margin-bottom: 18px;
     }
 </style>
 
-<div class="actions" style="display: flex; align-items: flex-start; height: 5vh;">
-    <a href="{% url 'CadFornecedor' %}" class="action-link">Voltar</a>
+<div class="container mt-5 form-container">
+
+    <h1 class="text-center">Editar Fornecedor</h1>
+    
+    <form method="post" enctype="multipart/form-data" class="mt-3">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.fornecedor.label_tag }}
+                {{ form.fornecedor }}
+                {{ form.fornecedor.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.fornecedor_fone.label_tag }}
+                {{ form.fornecedor_fone }}
+                {{ form.fornecedor_fone.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.fornecedor_site.label_tag }}
+                {{ form.fornecedor_site }}
+                {{ form.fornecedor_site.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.fornecedor_email.label_tag }}
+                {{ form.fornecedor_email }}
+                {{ form.fornecedor_email.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.rua.label_tag }}
+                {{ form.rua }}
+                {{ form.rua.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.numero.label_tag }}
+                {{ form.numero }}
+                {{ form.numero.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.bairro.label_tag }}
+                {{ form.bairro }}
+                {{ form.bairro.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.cidade.label_tag }}
+                {{ form.cidade }}
+                {{ form.cidade.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.estado.label_tag }}
+                {{ form.estado }}
+                {{ form.estado.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.cep.label_tag }}
+                {{ form.cep }}
+                {{ form.cep.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.contato.label_tag }}
+                {{ form.contato }}
+                {{ form.contato.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.cnpj.label_tag }}
+                {{ form.cnpj }}
+                {{ form.cnpj.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.inscricao_estadual.label_tag }}
+                {{ form.inscricao_estadual }}
+                {{ form.inscricao_estadual.errors }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.prazo_entrega_medio.label_tag }}
+                {{ form.prazo_entrega_medio }}
+                {{ form.prazo_entrega_medio.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.observacoes.label_tag }}
+            {{ form.observacoes }}
+            {{ form.observacoes.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a href="{% url 'CadFornecedor' %}" class="btn btn-success" style="background-color: #3C93DA;">Voltar</a>
+
+    </form>
 </div>
 
-        <h1 style="text-align: center;">Editar Fornecedor</h1>
-        
-        <form method="post" enctype="multipart/form-data" class="mt-3">
-            {% csrf_token %}
-
-            <table>
-                <!-- Primeira linha  -->
-                <tr>
-                    <td colspan="3">
-                        <div class="mb-3">
-                            {{ form.fornecedor.label_tag }}
-                            {{ form.fornecedor }}
-                            {{ form.fornecedor.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.fornecedor_fone.label_tag }}
-                            {{ form.fornecedor_fone }}
-                            {{ form.fornecedor_fone.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.fornecedor_site.label_tag }}
-                            {{ form.fornecedor_site }}
-                            {{ form.fornecedor_site.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.fornecedor_email.label_tag }}
-                            {{ form.fornecedor_email }}
-                            {{ form.fornecedor_email.errors }}
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <div class="mb-3">
-                            {{ form.rua.label_tag }}
-                            {{ form.rua }}
-                            {{ form.rua.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.numero.label_tag }}
-                            {{ form.numero }}
-                            {{ form.numero.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.bairro.label_tag }}
-                            {{ form.bairro }}
-                            {{ form.bairro.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.cidade.label_tag }}
-                            {{ form.cidade }}
-                            {{ form.cidade.errors }}
-                        </div>
-                    </td>
-        
-        
-                </tr>
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.estado.label_tag }}
-                            {{ form.estado }}
-                            {{ form.estado.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.cep.label_tag }}
-                            {{ form.cep }}
-                            {{ form.cep.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.contato.label_tag }}
-                            {{ form.contato }}
-                            {{ form.contato.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.cnpj.label_tag }}
-                            {{ form.cnpj }}
-                            {{ form.cnpj.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.inscricao_estadual.label_tag }}
-                            {{ form.inscricao_estadual }}
-                            {{ form.inscricao_estadual.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.prazo_entrega_medio.label_tag }}
-                            {{ form.prazo_entrega_medio }}
-                            {{ form.prazo_entrega_medio.errors }}
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="6">
-                        <div class="mb-3">
-                            {{ form.observacoes.label_tag }}
-                            {{ form.observacoes }}
-                            {{ form.observacoes.errors }}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            
-
-            <button type="submit" class="btn btn-success">Salvar</button>
-        </form>
-        
 {% endblock %}

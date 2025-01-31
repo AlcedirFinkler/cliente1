@@ -9,7 +9,7 @@ class CadastroPendente(models.Model):
     senha = models.CharField(max_length=128)
     grupo = models.CharField(max_length=50, choices=[("Solicitante", "Solicitante"), ("Técnico", "Técnico"), ("Estoquista", "Estoquista"), ("Gestor", "Gestor")], default='Solicitante')
     data_cadastro = models.DateTimeField(auto_now_add=True)
-    is_approved = models.BooleanField(default=False)  # Novo campo
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.username} ({self.grupo})"

@@ -1,238 +1,294 @@
-<!-- listar_manutencoes.html -->
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Listar manutenções preventivas!{% endblock %}
+{% block title %}Listar Manutenções Preventivas{% endblock %}
 {% block content %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .container-flex {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
-        }
-        .main-content {
-            flex: 0 0 75%;
-        }
-        .calendar-sidebar {
-            flex: 0 0 25%;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-        }
-        .calendar {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .calendar th, .calendar td {
-            padding: 6px;
-            text-align: center;
-            border: 1px solid #dee2e6;
-            font-size: 0.9em;
-        }
-        .calendar td {
-            cursor: pointer;
-        }
-        .calendar td:hover {
-            background-color: #e9ecef;
-        }
-        .maintenance-date {
-            background-color: #ffd700;
-        }
-        .today {
-            font-weight: bold;
-            border: 2px solid #007bff;
-        }
-        .month-title {
-            text-align: center;
-            margin: 10px 0;
-            font-size: 1.2em;
-            color: #333;
-        }
-    </style>
 
-<div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
-    <a href="{% url 'modulos' %}" class="action-link btn btn-secondary btn-sm">Voltar</a>
-    <a href="{% url 'criar_manutencao' %}" class="action-link btn btn-secondary btn-sm">Adicionar Manutenção</a>
-    <a href="{% url 'login' %}" class="action-link">Sair</a>
-</div>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
-    <div class="container-flex">
-        <div class="main-content">
-           
+<style>
+    .content-container th {
+        font-size: 20px;
+        text-align: center;
+    }
 
-            <h1 style="text-align: center;">Manutenções Preventivas</h1>
+    .content-container .delete-button {
+        background-color: rgb(253, 92, 92);
+    }
 
-<!-- Formulário de Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-2">
-                <label for="nome_equipamento" class="form-label">Nome Equipamento</label>
-                <input type="text" class="form-control" id="nome_equipamento" name="nome_equipamento" 
-                       value="{{ filtros.nome_equipamento }}">
-            </div>
-            <div class="col-md-2">
-                <label for="tag_equipamento" class="form-label">TAG</label>
-                <input type="text" class="form-control" id="tag_equipamento" name="tag_equipamento" 
-                       value="{{ filtros.tag_equipamento }}">
-            </div>
-            <div class="col-md-2">
-                <label for="classe_equipamento" class="form-label">Classe</label>
-                <select class="form-select" id="classe_equipamento" name="classe_equipamento">
-                    <option value="">Todas</option>
-                    {% for classe in classes_equipamento %}
-                        <option value="{{ classe }}" {% if classe == filtros.classe_equipamento %}selected{% endif %}>
-                            {{ classe }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select" id="status" name="status">
-                    <option value="">Todos</option>
-                    {% for value, label in status_choices.items %}
-                        <option value="{{ value }}" {% if value == filtros.status %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="setor" class="form-label">Setor</label>
-                <select class="form-select" id="setor" name="setor">
-                    <option value="">Todos</option>
-                    {% for setor_op in setores %}
-                        <option value="{{ setor_op.setor }}" {% if setor_op.setor|stringformat:"i" == filtros.setor %}selected{% endif %}>
-                            {{ setor_op.setor__nome }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">Filtrar</button>
-                <a href="{% url 'listar_manutencoes' %}" class="btn btn-secondary ms-2">Limpar</a>
-            </div>
-        </form>
+    .content-container .delete-button:hover {
+        background-color: rgb(255, 0 ,0);
+    }
+
+    .calendar-sidebar {
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .calendar {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .calendar th, .calendar td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        font-size: 1em;
+    }
+
+    .calendar th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .calendar td {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .calendar td:hover {
+        background-color: #e9ecef;
+    }
+
+    .maintenance-date {
+        background-color: #ffd700;
+    }
+
+    .today {
+        font-weight: bold;
+        border: 2px solid #007bff;
+    }
+
+    .month-title {
+        text-align: center;
+        margin: 10px 0;
+        font-size: 1.5em;
+        color: #333;
+    }
+
+    .scroll-button {
+        position: fixed;
+        right: 20px;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 1000;
+    }
+
+    .scroll-button:hover {
+        background-color: #0056b3;
+    }
+
+    .scroll-to-top {
+        top: 20px;
+    }
+
+    .scroll-to-bottom {
+        bottom: 20px;
+    }
+</style>
+
+<div class="content-container">
+    <div class="top-side">
+        <h1 style="text-align: left; margin-left: 40px;">Manutenções Preventivas</h1>
+        <a href="{% url 'criar_manutencao' %}" class="custom-button" style="margin-right: 150px;">Adicionar Manutenção</a>
     </div>
-</div>
 
-<!-- Tabela de Manutenções -->
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>TAG</th>
-            <th>Equipamento</th>
-            <th>Setor</th>
-            <th>Descrição</th>
-            <th>Status</th>
-            <th>Data Última Manutenção</th>
-            <th>Data Próxima Manutenção</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for manutencao in manutencoes %}
-        <tr>
-            <td>{{ manutencao.equipamento.tag }}</td>
-            <td>{{ manutencao.equipamento.nome }}</td>
-            <td>{{ manutencao.equipamento.setor }}</td>
-            <td>{{ manutencao.descricao }}</td>
-            <td>{{ manutencao.get_status_display }}</td>
-            <td>{{ manutencao.data_ultima_manutencao }}</td>
-            <td>{{ manutencao.data_proxima_manutencao }}</td>
-            <td>
-                <a href="{% url 'editar_manutencao' manutencao.id %}" class="btn btn-warning btn-sm">Editar</a>
-                <a href="{% url 'excluir_manutencao' manutencao.id %}" class="btn btn-danger btn-sm" 
-                   onclick="return confirm('Tem certeza que deseja excluir esta manutenção?');">Excluir</a>
-                <a href="{% url 'gerar_os_preventiva' manutencao.id %}" class="btn btn-primary">Gerar OS</a>
+    <!-- Formulário de Filtros -->
+    <table class="tabela-sem-divisoes" style="border: none">
+        <form method="get">
+            <td style="width: 15%">
+                <div>
+                    <label for="nome_equipamento">Nome Equipamento:</label>
+                    <input type="text" name="nome_equipamento" id="nome_equipamento" placeholder="Digite o nome do equipamento" value="{{ filtros.nome_equipamento }}">
+                </div>
             </td>
-        </tr>
+            <td style="width: 15%">
+                <div>
+                    <label for="tag_equipamento">TAG:</label>
+                    <input type="text" name="tag_equipamento" id="tag_equipamento" placeholder="Digite a TAG" value="{{ filtros.tag_equipamento }}">
+                </div>
+            </td>
+            <td style="width: 15%">
+                <div>
+                    <label for="classe_equipamento">Classe:</label>
+                    <select name="classe_equipamento" id="classe_equipamento">
+                        <option value="">Todas</option>
+                        {% for classe in classes_equipamento %}
+                            <option value="{{ classe }}" {% if classe == filtros.classe_equipamento %}selected{% endif %}>{{ classe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </td>
+            <td style="width: 15%">
+                <div>
+                    <label for="status">Status:</label>
+                    <select name="status" id="status">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices.items %}
+                            <option value="{{ value }}" {% if value == filtros.status %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </td>
+            <td style="width: 15%">
+                <div>
+                    <label for="setor">Setor:</label>
+                    <select name="setor" id="setor">
+                        <option value="">Todos</option>
+                        {% for setor_op in setores %}
+                            <option value="{{ setor_op.setor }}" {% if setor_op.setor|stringformat:"i" == filtros.setor %}selected{% endif %}>{{ setor_op.setor__nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </td>
+            <td style="width: 10%;">
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'listar_manutencoes' %}" class="btn btn-primary">Limpar</a>
+                </div>
+            </td>
+        </form>
+    </table>
+
+    <!-- Tabela de Manutenções -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>TAG</th>
+                <th>Equipamento</th>
+                <th>Setor</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Data Última Manutenção</th>
+                <th>Data Próxima Manutenção</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for manutencao in manutencoes %}
+            <tr>
+                <td>{{ manutencao.equipamento.tag }}</td>
+                <td>{{ manutencao.equipamento.nome }}</td>
+                <td>{{ manutencao.equipamento.setor }}</td>
+                <td>{{ manutencao.descricao }}</td>
+                <td>{{ manutencao.get_status_display }}</td>
+                <td>{{ manutencao.data_ultima_manutencao }}</td>
+                <td>{{ manutencao.data_proxima_manutencao }}</td>
+                <td style="text-align: center;">
+                    <a href="{% url 'editar_manutencao' manutencao.id %}" class="custom-button table-button">Editar</a>
+                    <form method="post" action="{% url 'excluir_manutencao' manutencao.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="submit" class="custom-button table-button delete-button">Excluir</button>
+                    </form>
+                    <a href="{% url 'gerar_os_preventiva' manutencao.id %}" class="custom-button table-button">Gerar OS</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="calendar-sidebar" id="calendarSection">
+        {% for cal in calendars %}
+        <div class="month-calendar">
+            <h3 class="month-title">{{ cal.month_name }} {{ cal.year }}</h3>
+            <table class="calendar" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
+                <thead>
+                    <tr>
+                        <th>Dom</th>
+                        <th>Seg</th>
+                        <th>Ter</th>
+                        <th>Qua</th>
+                        <th>Qui</th>
+                        <th>Sex</th>
+                        <th>Sáb</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in cal.calendar %}
+                    <tr>
+                        {% for day in week %}
+                        {% if day != 0 %}
+                        <td class="{% if day == today.day and cal.month == today.month and cal.year == today.year %}today{% endif %}" 
+                            data-date="{{ day }}"
+                            data-year="{{ cal.year }}"
+                            data-month="{{ cal.month }}"
+                            onclick="filterByDate(this)">
+                            {{ day }}
+                        </td>
+                        {% else %}
+                        <td></td>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
 </div>
 
+<button class="scroll-button scroll-to-top" onclick="scrollToTop()">Ir para o Topo</button>
+<button class="scroll-button scroll-to-bottom" onclick="scrollToBottom()">Ir para Calendários</button>
 
-        <div class="calendar-sidebar">
-            {% for cal in calendars %}
-            <div class="month-calendar">
-                <h3 class="month-title">{{ cal.month_name }} {{ cal.year }}</h3>
-                <table class="calendar" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
-                    <thead>
-                        <tr>
-                            <th>Dom</th>
-                            <th>Seg</th>
-                            <th>Ter</th>
-                            <th>Qua</th>
-                            <th>Qui</th>
-                            <th>Sex</th>
-                            <th>Sáb</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for week in cal.calendar %}
-                        <tr>
-                            {% for day in week %}
-                            {% if day != 0 %}
-                            <td class="{% if day == today.day and cal.month == today.month and cal.year == today.year %}today{% endif %}" 
-                                data-date="{{ day }}"
-                                data-year="{{ cal.year }}"
-                                data-month="{{ cal.month }}"
-                                onclick="filterByDate(this)">
-                                {{ day }}
-                            </td>
-                            {% else %}
-                            <td></td>
-                            {% endif %}
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+<script>
+    function confirmDelete() {
+        return confirm('Tem certeza que deseja excluir esta manutenção?');
+    }
 
-    <script>
-        // Dados de manutenção do backend
-        const maintenanceDates = JSON.parse('{{ maintenance_dates|escapejs }}');
+    function scrollToBottom() {
+        document.getElementById('calendarSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Dados de manutenção do backend
+    const maintenanceDates = JSON.parse('{{ maintenance_dates|escapejs }}');
+    
+    // Marcar datas com manutenção
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendars = document.querySelectorAll('.calendar');
         
-        // Marcar datas com manutenção
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendars = document.querySelectorAll('.calendar');
+        calendars.forEach(calendar => {
+            const year = calendar.dataset.year;
+            const month = calendar.dataset.month;
+            const monthKey = `${year}-${month}`;
+            const monthMaintenances = maintenanceDates[monthKey] || [];
             
-            calendars.forEach(calendar => {
-                const year = calendar.dataset.year;
-                const month = calendar.dataset.month;
-                const monthKey = `${year}-${month}`;
-                const monthMaintenances = maintenanceDates[monthKey] || [];
+            const cells = calendar.querySelectorAll('td[data-date]');
+            cells.forEach(cell => {
+                const day = cell.getAttribute('data-date');
+                const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
-                const cells = calendar.querySelectorAll('td[data-date]');
-                cells.forEach(cell => {
-                    const day = cell.getAttribute('data-date');
-                    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    
-                    if (monthMaintenances.includes(dateString)) {
-                        cell.classList.add('maintenance-date');
-                    }
-                });
+                if (monthMaintenances.includes(dateString)) {
+                    cell.classList.add('maintenance-date');
+                }
             });
         });
+    });
 
-        // Função para filtrar por data
-        function filterByDate(cell) {
-            const day = cell.getAttribute('data-date');
-            const year = cell.getAttribute('data-year');
-            const month = cell.getAttribute('data-month');
-            const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            window.location.href = `?date=${date}`;
-        }
-    </script>
+    // Função para filtrar por data
+    function filterByDate(cell) {
+        const day = cell.getAttribute('data-date');
+        const year = cell.getAttribute('data-year');
+        const month = cell.getAttribute('data-month');
+        const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        window.location.href = `?date=${date}`;
+    }
+</script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

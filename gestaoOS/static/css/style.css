@@ -1,6 +1,6 @@
 /* Estilos gerais */
 body {
-    font-family: Arial, sans-serif;
+    font-family: Garamond, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f9f9f9;
@@ -208,7 +208,7 @@ tr:hover {
 }
 
 .toggle-button.selected {
-    background-color: #0056b3;
+    background-color: #3C93DA;
     color: white;
     font-weight: bold;
 }
@@ -239,6 +239,7 @@ input, select, textarea {
     width: 100%; /* Garantir que o campo ocupe toda a largura disponível */
 }
 
+
 /* Responsividade */
 @media (max-width: 768px) {
     .header-filters {
@@ -262,3 +263,4 @@ input, select, textarea {
         margin-bottom: 10px;
     }
 }
+

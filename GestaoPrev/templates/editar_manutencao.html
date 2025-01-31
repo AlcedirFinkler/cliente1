@@ -3,8 +3,24 @@
 {% block title %}Editar Manutenção{% endblock %}
 {% block content %}
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Include Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 <style>
+    .form-container .actions {
+        display: flex;
+        align-items: flex-start;
+        height: 5vh;
+    }
+    .form-container .action-link {
+        margin-bottom: 20px;
+    }
+    .form-container table {
+        width: 100%;
+    }
+    .form-container table td, .form-container table th {
+        border: none;
+    }
     .selected-part-item {
         display: flex;
         justify-content: space-between;
@@ -24,38 +40,52 @@
         color: blue;
     }
     .part-list-item.selected-part {
-    background-color: #e0e0e0;
+        background-color: #e0e0e0;
     }
     .part-list-item.selected-part .quantity-input {
-    display: block;
+        display: block;
+    }
+    .sidenav a, .sidenav h1 {
+        all: unset;
+        display: block;
+        text-decoration: none;
+        font-family: 'Roboto', sans-serif;
+    }
+    .sidenav a {
+        padding-left: 32px;
+        padding-bottom: 5px;
+        font-size: 20px;
+        color: #818181;
+    }
+    .sidenav h1 {
+        padding-top: 14px;
+        padding-bottom: 11px;
+        padding-left: 32px;
+        font-size: 30px;
+        color: #c4c4c4;
+        font-weight: bold;
+    }
+    
+    .sidenav .bottom-links {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        margin-bottom: 18px;
     }
 </style>
 
-<div class="actions" style="display: flex; align-items: flex-start; height: 5vh;">
-    <a href="{% url 'listar_manutencoes' %}" class="action-link">Voltar</a>
-</div>
-
-{% if messages %}
-<div class="messages">
-    {% for message in messages %}
-        <div class="alert {{ message.tags }}">
-            {{ message }}
-        </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-
-<div class="container mt-5">
-    <h2 class="text-center">Editar Manutenção Preventiva</h2>
+<div class="container mt-5 form-container">
+    <h1 class="text-center">Editar Manutenção Preventiva</h1>
+    
     <form method="post" enctype="multipart/form-data" id="manutencaoForm">
         {% csrf_token %}
-
         <input type="hidden" name="pecas_quantidade" id="pecas-quantidade-hidden" value="">
 
-        <div class="mb-3">
-            <label for="equipamento-display">Equipamento:</label>
-            <input type="text" id="equipamento-display" class="form-control" value="{{ manutencao.equipamento.nome }} - {{ manutencao.equipamento.tag }}" readonly>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="equipamento-display">Equipamento:</label>
+                <input type="text" id="equipamento-display" class="form-control" value="{{ manutencao.equipamento.nome }} - {{ manutencao.equipamento.tag }}" readonly>
+            </div>
         </div>
 
         <div style="display: none;">
@@ -63,113 +93,87 @@
             {{ form.pecas }}
         </div>
 
-        <table>
-            <!-- Primeira linha  -->
-            <tr>
-                <td>
-                    <div class="mb-3">
-                        {{ form.descricao.label_tag }}
-                        {{ form.descricao }}
-                        {% if form.descricao.errors %}
-                            <div class="error-message">{{ form.descricao.errors }}</div>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>
-                    <div class="mb-3">
-                        {{ form.tipo_calculo.label_tag }}
-                        {{ form.tipo_calculo }}
-                        {% if form.tipo_calculo.errors %}
-                            <div class="error-message">{{ form.tipo_calculo.errors }}</div>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>
-                    <div class="mb-3">
-                        {{ form.requer_parada.label_tag }}
-                        {{ form.requer_parada }}
-                        {% if form.requer_parada.errors %}
-                            <div class="error-message">{{ form.requer_parada.errors }}</div>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>
-                    <div class="mb-3">
-                        {{ form.duracao_estimada.label_tag }}
-                        {{ form.duracao_estimada }}
-                        {% if form.duracao_estimada.errors %}
-                            <div class="error-message">{{ form.duracao_estimada.errors }}</div>
-                        {% endif %}
-                    </div>
-                </td>
-                <td>
-                    <div class="mb-3">
-                        {{ form.status.label_tag }}
-                        {{ form.status }}
-                        {% if form.status.errors %}
-                            <div class="error-message">{{ form.status.errors }}</div>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            </table>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.descricao.label_tag }}
+                {{ form.descricao }}
+                {% if form.descricao.errors %}
+                    <div class="error-message">{{ form.descricao.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.tipo_calculo.label_tag }}
+                {{ form.tipo_calculo }}
+                {% if form.tipo_calculo.errors %}
+                    <div class="error-message">{{ form.tipo_calculo.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.requer_parada.label_tag }}
+                {{ form.requer_parada }}
+                {% if form.requer_parada.errors %}
+                    <div class="error-message">{{ form.requer_parada.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
 
-            <table>
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.data_ultima_manutencao.label_tag }}
-                            {{ form.data_ultima_manutencao }}
-                            {% if form.data_ultima_manutencao.errors %}
-                                <div class="error-message">{{ form.data_ultima_manutencao.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.horimetro_atual.label_tag }}
-                            {{ form.horimetro_atual }}
-                            {% if form.horimetro_atual.errors %}
-                                <div class="error-message">{{ form.horimetro_atual.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </td>
-                    
-                    
-                    <td>
-                        <div class="mb-3">
-                            {{ form.horas_intervalo.label_tag }}
-                            {{ form.horas_intervalo }}
-                            {% if form.horas_intervalo.errors %}
-                                <div class="error-message">{{ form.horas_intervalo.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.periodo_meses.label_tag }}
-                            {{ form.periodo_meses }}
-                            {% if form.periodo_meses.errors %}
-                                <div class="error-message">{{ form.periodo_meses.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-    
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.procedimentos.label_tag }}
-                            {{ form.procedimentos }}
-                            {% if form.procedimentos.errors %}
-                                <div class="error-message">{{ form.procedimentos.errors }}</div>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            
-        <div class="mb-3">
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.duracao_estimada.label_tag }}
+                {{ form.duracao_estimada }}
+                {% if form.duracao_estimada.errors %}
+                    <div class="error-message">{{ form.duracao_estimada.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.status.label_tag }}
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="error-message">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.data_ultima_manutencao.label_tag }}
+                {{ form.data_ultima_manutencao }}
+                {% if form.data_ultima_manutencao.errors %}
+                    <div class="error-message">{{ form.data_ultima_manutencao.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.horimetro_atual.label_tag }}
+                {{ form.horimetro_atual }}
+                {% if form.horimetro_atual.errors %}
+                    <div class="error-message">{{ form.horimetro_atual.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.horas_intervalo.label_tag }}
+                {{ form.horas_intervalo }}
+                {% if form.horas_intervalo.errors %}
+                    <div class="error-message">{{ form.horas_intervalo.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.periodo_meses.label_tag }}
+                {{ form.periodo_meses }}
+                {% if form.periodo_meses.errors %}
+                    <div class="error-message">{{ form.periodo_meses.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.procedimentos.label_tag }}
+            {{ form.procedimentos }}
+            {% if form.procedimentos.errors %}
+                <div class="error-message">{{ form.procedimentos.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
             <h4>Peças Selecionadas:</h4>
             <table class="table table-bordered">
                 <thead>
@@ -206,7 +210,7 @@
                 Adicionar Peças
             </button>
         </div>
-    
+
         <button type="submit" class="btn btn-primary">Salvar Alterações</button>
         <a href="{% url 'listar_manutencoes' %}" class="btn btn-secondary">Cancelar</a>
     </form>

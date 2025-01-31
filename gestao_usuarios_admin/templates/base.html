@@ -1,0 +1,27 @@
+{%load static %}
+<!DOCTYPE html>
+<html lang="en">
+    asdasd
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestão de Usuários{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<body class="d-flex">
+    <div class="sidebar bg-light">
+        <h2>Menu</h2>
+        <ul class="list-unstyled">
+            <li><a href="{% url 'listar_usuarios_pendentes' %}">Usuários Pendentes</a></li>
+            <li><a href="{% url 'criar_usuario' %}">Criar Usuário</a></li>
+            <li><a href="{% url 'modulos' %}">Módulos</a></li>
+            <li><a href="{% url 'login' %}">Sair</a></li>
+        </ul>
+    </div>
+    <div class="content p-4" style="flex-grow: 1;">
+        {% block content %}{% endblock %}
+    </div>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

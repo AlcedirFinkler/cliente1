@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('usuarios-pendentes/', views.listar_usuarios_pendentes, name='listar_usuarios_pendentes'),
+    path('listar-pendentes/', views.listar_usuarios_pendentes, name='listar_usuarios_pendentes'),
     path('editar-pendente/<int:pk>/', views.editar_usuario_pendente, name='editar_usuario_pendente'),
     path('criar-usuario/', views.criar_usuario, name='criar_usuario'),
 ]

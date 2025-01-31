@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Tela gestão de equipamentos!{% endblock %}
+{% block title %}Gestão de Equipamentos{% endblock %}
 {% block content %}
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -9,101 +9,123 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
-<div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
-    <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
-    <a href="{% url 'cria_equipamento' %}" class="action-link">Cadastrar Novo Equipamento</a>
-    <a href="{% url 'login' %}" class="action-link">Sair</a>
+<style>
+    .content-container th {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .content-container .delete-button {
+        background-color: rgb(253, 92, 92);
+    }
+
+    .content-container .delete-button:hover {
+        background-color: rgb(255, 0 ,0);
+    }
+</style>
+
+<div class="content-container">
+    <div class="top-side">
+        <h1 style="text-align: left; margin-left: 40px;">Gestão de Equipamentos</h1>
+        <a href="{% url 'cria_equipamento' %}" class="custom-button">Cadastrar Novo Equipamento</a>
+    </div>
+
+    <!-- Formulário de filtros -->
+    <table class="tabela-sem-divisoes" style="border: none">
+        <form method="get" action="{% url 'CadEquip' %}">
+            <!-- Filtro: TAG -->
+            <td style="width: 15%">
+                <div>
+                    <label for="tag">TAG:</label>
+                    <input type="text" name="tag" id="tag" placeholder="Digite parte do nome da TAG">
+                </div>
+            </td>
+
+            <!-- Filtro: Nome -->
+            <td style="width: 15%">
+                <div>
+                    <label for="nome">Nome do Equipamento:</label>
+                    <input type="text" name="nome" id="nome" placeholder="Digite parte do nome do equipamento">
+                </div>
+            </td>
+
+            <!-- Filtro: Fabricante -->
+            <td style="width: 15%">
+                <div>
+                    <label for="fabricante">Fabricante:</label>
+                    <input type="text" name="fabricante" id="fabricante" placeholder="Digite parte do nome do fabricante">
+                </div>
+            </td>
+
+            <!-- Filtro: Setor -->
+            <td style="width: 15%">
+                <div>
+                    <label for="setor">Setor:</label>
+                    <select name="setor" id="setor">
+                        <option value="">Todos</option>
+                        {% for setor in setores %}
+                            <option value="{{ setor.id }}">{{ setor.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </td>
+
+            <!-- Filtro: Classe -->
+            <td style="width: 15%">
+                <div>
+                    <label for="classe">Classe:</label>
+                    <input type="text" name="classe" id="classe" placeholder="Classe">
+                </div>
+            </td>
+
+            <!-- Botão "Filtrar" -->
+            <td style="width: 10%;">
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </td>
+        </form>
+    </table>
+
+    <!-- Tabela de Equipamentos -->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>TAG</th>
+                <th>Nome</th>
+                <th>Fabricante</th>
+                <th>Modelo</th>
+                <th>Setor</th>
+                <th>Classe</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for equipamento in equipamentos %}
+                <tr>
+                    <td>{{ equipamento.tag }}</td>
+                    <td>{{ equipamento.nome }}</td>
+                    <td>{{ equipamento.fabricante }}</td>
+                    <td>{{ equipamento.modelo }}</td>
+                    <td>{{ equipamento.setor.nome }}</td>
+                    <td>{{ equipamento.classe }}</td>
+                    <td style="text-align: center;">
+                        <a href="{% url 'editar_equipamento' equipamento.id %}" class="custom-button table-button">Editar</a>
+                        <form method="post" action="{% url 'excluir_equipamento' equipamento.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                            {% csrf_token %}
+                            <button type="submit" class="custom-button table-button delete-button">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<!-- Formulário de filtros -->
-<table class="tabela-sem-divisoes", style="border: none">
-    <form method="get" action="{% url 'CadEquip' %}">
-        <!-- Filtro: TAG -->
-        <td style="width: 5%">
-            <div>
-                <label for="tag">TAG:</label>
-                <input type="text" name="tag" id="tag" placeholder="Digite parte do nome da TAG">
-            </div>
-        </td>
-
-        <!-- Filtro: Nome -->
-        <td style="width: 15%">
-            <div>
-                <label for="nome">Nome do Equipamento:</label>
-                <input type="text" name="nome" id="nome" placeholder="Digite parte do nome do equipamento">
-            </div>
-        </td>
-
-        <!-- Filtro: Fabricante -->
-        <td style="width: 15%">
-            <div>
-                <label for="fabricante">Fabricante:</label>
-                <input type="text" name="fabricante" id="fabricante" placeholder="Digite parte do nome do fabricante">
-            </div>
-        </td>
-
-        <!-- Filtro: Setor -->
-        <td style="width: 15%">
-            <div>
-                <label for="setor">Setor:</label>
-                <select name="setor" id="setor">
-                    <option value="">Todos</option>
-                    {% for setor in setores %}
-                        <option value="{{ setor.id }}">{{ setor.nome }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </td>
-
-        <td style="width: 5%">
-            <div>
-                <label for="classe">Classe:</label>
-                <input type="text" name="classe" id="classe" placeholder="Classe">
-            </div>
-        </td>
-
-        <!-- Botão "Filtrar" -->
-        <td>
-            <div style="grid-column: span 6; text-align: center;">
-                <button type="submit" class="btn-filter">Filtrar</button>
-            </div>
-        </td>
-    </form>
-</table>
-
-<!-- Tabela de Equipamentos -->
-<table border="1">
-    <thead>
-        <tr>
-            <th style="width: 5%">TAG</th>
-            <th style="width: 15%">Nome</th>
-            <th style="width: 15%">Fabricante</th>
-            <th style="width: 15%">Modelo</th>
-            <th style="width: 15%">Setor</th>
-            <th style="width: 10%">Classe</th>
-            <th style="width: 10%">Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for equipamento in equipamentos %}
-            <tr>
-                <td>{{ equipamento.tag }}</td>
-                <td>{{ equipamento.nome }}</td>
-                <td>{{ equipamento.fabricante }}</td>
-                <td>{{ equipamento.modelo }}</td>
-                <td>{{ equipamento.setor.nome }}</td>
-                <td>{{ equipamento.classe }}</td>
-                <td>
-                    <a href="{% url 'editar_equipamento' equipamento.id %}">
-                        <img src="{% static 'images/edit_icon.png' %}" alt="Editar" style="width: 20px; height: 20px;">
-                    </a>
-                    <a href="{% url 'excluir_equipamento' equipamento.id %}" onclick="return confirm('Tem certeza que deseja excluir este equipamento?');">
-                        <img src="{% static 'images/delete_icon.png' %}" alt="Excluir" style="width: 20px; height: 20px;">
-                    </a>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<script>
+    function confirmDelete() {
+        return confirm('Tem certeza que deseja excluir este equipamento?');
+    }
+</script>
 
 {% endblock %}

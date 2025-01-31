@@ -1,10 +1,26 @@
 {% extends "base.html" %}
 {% load static %}
+{% block title %}Editar Peça{% endblock %}
 {% block content %}
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Include Bootstrap CSS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
+    .form-container .actions {
+        display: flex;
+        align-items: flex-start;
+        height: 5vh;
+    }
+    .form-container .action-link {
+        margin-bottom: 20px;
+    }
+    .form-container table {
+        width: 100%;
+    }
+    .form-container table td, .form-container table th {
+        border: none;
+    }
     .selected-fornecedor {
         background-color: #d9edf7;
         font-weight: bold;
@@ -15,178 +31,155 @@
     .visible-table {
         display: table;
     }
+    .sidenav a, .sidenav h1 {
+        all: unset;
+        display: block;
+        text-decoration: none;
+        font-family: 'Roboto', sans-serif;
+    }
+    .sidenav a {
+        padding-left: 32px;
+        padding-bottom: 5px;
+        font-size: 20px;
+        color: #818181;
+    }
+    .sidenav h1 {
+        padding-top: 14px;
+        padding-bottom: 11px;
+        padding-left: 32px;
+        font-size: 30px;
+        color: #c4c4c4;
+        font-weight: bold;
+    }
+    
+    .sidenav .bottom-links {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        margin-bottom: 18px;
+    }
 </style>
 
-<div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
-    <a href="{% url 'cadEstoque' %}" class="action-link">Voltar</a>
-    <a href="{% url 'login' %}" class="action-link">Sair</a>
-</div>
+<div class="container mt-5 form-container">
 
-<div class="container d-flex flex-column justify-content-start align-items-center">
-
-    <h2>Editar Peça</h2>
+    <h1 class="text-center">Editar Peça</h1>
+    
     <form method="post" enctype="multipart/form-data" class="mt-3">
         {% csrf_token %}
 
         <!-- Campo oculto para o fornecedor -->
         <input type="hidden" name="fornecedor" id="fornecedorId">
 
-
-            <table>
-                <!-- Primeira linha  -->
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.descricao.label_tag }}
-                            {{ form.descricao }}
-                            {{ form.descricao.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.codigo.label_tag }}
-                            {{ form.codigo }}
-                            {{ form.codigo.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.preco.label_tag }}
-                            {{ form.preco }}
-                            {{ form.preco.errors }}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <table>
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.unidade_medida.label_tag }}
-                            {{ form.unidade_medida }}
-                            {{ form.unidade_medida.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.localizacao.label_tag }}
-                            {{ form.localizacao }}
-                            {{ form.localizacao.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.data_ultima_compra.label_tag }}
-                            {{ form.data_ultima_compra }}
-                            {{ form.data_ultima_compra.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.vida_util.label_tag }}
-                            {{ form.vida_util }}
-                            {{ form.vida_util.errors }}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-            <table>
-                <tr>
-                    <td>
-                        <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#fornecedorModal">
-                            Alterar Fornecedor
-                        </button>
-                    </td>
-                    <td>                   
-                <!-- Exibição do fornecedor selecionado -->
-                <div id="fornecedorDisplay" class="mt-5">
-                    <h5>Fornecedor Associado</h5>
-                    {% if fornecedor_selecionado %}
-                        <p><strong>Nome:</strong> {{ fornecedor_selecionado.fornecedor }}</p>
-                    {% else %}
-                        <p>Nenhum fornecedor associado a este equipamento.</p>
-                    {% endif %}
-                </div>
-                </td> 
-                </tr>
-            </table>
-
-            <table id="fornecedorDetails" class="table mt-3 {% if fornecedor_selecionado %}visible-table{% else %}hidden-table{% endif %}">
-                <thead>
-                    <tr>
-                        <th>Campo</th>
-                        <th>Valor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><strong>Nome:</strong></td><td id="fornecedorNome">{{ fornecedor_selecionado.fornecedor }}</td>
-                    <td><strong>Telefone:</strong></td><td id="fornecedorFone">{{ fornecedor_selecionado.fornecedor_fone }}</td>
-                    <td><strong>Site:</strong></td><td id="fornecedorSite">{{ fornecedor_selecionado.fornecedor_site }}</td></tr>
-                    <tr><strong><td>Email:</strong></td><td id="fornecedorEmail">{{ fornecedor_selecionado.fornecedor_email }}</td>
-                    <td><strong>Rua:</strong></td><td id="fornecedorRua">{{ fornecedor_selecionado.rua }}</td>
-                    <td><strong>Número:</strong></td><td id="fornecedorRua">{{ fornecedor_selecionado.numero }}</td></tr>
-                    <tr><strong><td>Cidade:</strong></td><td id="fornecedorRua">{{ fornecedor_selecionado.cidade }}</td>
-                    <td><strong>CEP:</strong></td><td id="fornecedorRua">{{ fornecedor_selecionado.cep }}</td>    
-                    <td><strong>CNPJ</strong></td><td id="fornecedorCnpj">{{ fornecedor_selecionado.cnpj }}</td></tr>
-                    <tr><td><strong>Contato:</strong></td><td id="fornecedorContato">{{ fornecedor_selecionado.contato }}</td></tr>
-                </tbody>
-            </table>
-
-            <table>
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.estoque_minimo.label_tag }}
-                            {{ form.estoque_minimo }}
-                            {{ form.estoque_minimo.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.estoque_atual.label_tag }}
-                            {{ form.estoque_atual }}
-                            {{ form.estoque_atual.errors }}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-            <table>
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.orcamentos.label_tag }}
-                            {{ form.orcamentos }}
-                            {{ form.orcamentos.errors }}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.foto.label_tag }}
-                            {{ form.foto }}
-                            {{ form.foto.errors }}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            <table>
-                <tr>
-                    <td>
-                        <div class="mb-3">
-                            {{ form.observacoes.label_tag }}
-                            {{ form.observacoes }}
-                            {{ form.observacoes.errors }}
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Salvar</button>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.descricao.label_tag }}
+                {{ form.descricao }}
+                {{ form.descricao.errors }}
             </div>
+            <div class="form-group col-md-4">
+                {{ form.codigo.label_tag }}
+                {{ form.codigo }}
+                {{ form.codigo.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.preco.label_tag }}
+                {{ form.preco }}
+                {{ form.preco.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.unidade_medida.label_tag }}
+                {{ form.unidade_medida }}
+                {{ form.unidade_medida.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.localizacao.label_tag }}
+                {{ form.localizacao }}
+                {{ form.localizacao.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.data_ultima_compra.label_tag }}
+                {{ form.data_ultima_compra }}
+                {{ form.data_ultima_compra.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                {{ form.vida_util.label_tag }}
+                {{ form.vida_util }}
+                {{ form.vida_util.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.estoque_minimo.label_tag }}
+                {{ form.estoque_minimo }}
+                {{ form.estoque_minimo.errors }}
+            </div>
+            <div class="form-group col-md-4">
+                {{ form.estoque_atual.label_tag }}
+                {{ form.estoque_atual }}
+                {{ form.estoque_atual.errors }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                {{ form.orcamentos.label_tag }}
+                {{ form.orcamentos }}
+                {{ form.orcamentos.errors }}
+            </div>
+            <div class="form-group col-md-6">
+                {{ form.foto.label_tag }}
+                {{ form.foto }}
+                {{ form.foto.errors }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.observacoes.label_tag }}
+            {{ form.observacoes }}
+            {{ form.observacoes.errors }}
+        </div>
+
+        <div class="form-group col-md-6" style="border: 1px solid #000; padding: 10px;">
+            <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#fornecedorModal">
+                Alterar Fornecedor
+            </button>
+            <div id="fornecedorDisplay" class="mt-3">
+                {% if fornecedor_selecionado %}
+                    Fornecedor Selecionado: {{ fornecedor_selecionado.fornecedor }}
+                {% else %}
+                    Nenhum fornecedor selecionado.
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Trecho de exibição dos dados do fornecedor -->
+        <table id="fornecedorDetails" class="table mt-3 {% if fornecedor_selecionado %}visible-table{% else %}hidden-table{% endif %}">
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Nome</td><td id="fornecedorNome">{{ fornecedor_selecionado.fornecedor }}</td></tr>
+                <tr><td>Telefone</td><td id="fornecedorFone">{{ fornecedor_selecionado.fornecedor_fone }}</td></tr>
+                <tr><td>Site</td><td id="fornecedorSite">{{ fornecedor_selecionado.fornecedor_site }}</td></tr>
+                <tr><td>Email</td><td id="fornecedorEmail">{{ fornecedor_selecionado.fornecedor_email }}</td></tr>
+                <tr><td>Endereço</td><td id="fornecedorEndereco">{{ fornecedor_selecionado.rua }}, Nº {{ fornecedor_selecionado.numero }}, {{ fornecedor_selecionado.cidade }} - {{ fornecedor_selecionado.estado }}</td></tr>
+                <tr><td>CNPJ</td><td id="fornecedorCnpj">{{ fornecedor_selecionado.cnpj }}</td></tr>
+                <tr><td>Contato</td><td id="fornecedorContato">{{ fornecedor_selecionado.contato }}</td></tr>
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a href="{% url 'cadEstoque' %}" class="btn btn-success" style="background-color: #3C93DA;">Voltar</a>
     </form>
 
+    <!-- Modal de Seleção de Fornecedores -->
     <div class="modal fade" id="fornecedorModal" tabindex="-1" aria-labelledby="fornecedorModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -195,6 +188,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- Filtro de Pesquisa -->
                     <input type="text" id="fornecedorSearch" class="form-control mb-3" placeholder="Pesquisar por nome">
 
                     <ul id="fornecedorList" class="list-group">
@@ -202,16 +196,16 @@
                         <li class="list-group-item fornecedor-list-item" 
                             data-id="{{ fornecedor.id }}" 
                             data-nome="{{ fornecedor.fornecedor }}"
-                            data-fone="{{ fornecedor.fone }}"
-                            data-site="{{ fornecedor.site }}"
-                            data-email="{{ fornecedor.email }}"
-                            data-rua="{{ fornecedor.rua }}"
-                            data-numero="{{ fornecedor.numero }}"
-                            data-cidade="{{ fornecedor.cidade }}"
-                            data-cep="{{ fornecedor.cep }}"
-                            data-estado="{{ fornecedor.estado }}"
-                            data-cnpj="{{ fornecedor.cnpj }}"
-                            data-contato="{{ fornecedor.contato }}">
+                            data-fone="{{ fornecedor.fornecedor_fone }}"
+                            data-site="{{ fornecedor.fornecedor_site|default:'' }}"
+                            data-email="{{ fornecedor.fornecedor_email|default:'' }}"
+                            data-rua="{{ fornecedor.rua|default:'' }}"
+                            data-numero="{{ fornecedor.numero|default:'' }}"
+                            data-cidade="{{ fornecedor.cidade|default:'' }}"
+                            data-cep="{{ fornecedor.cep|default:'' }}"
+                            data-estado="{{ fornecedor.estado|default:'' }}"
+                            data-cnpj="{{ fornecedor.cnpj|default:'' }}"
+                            data-contato="{{ fornecedor.contato|default:'' }}">
                             {{ fornecedor.fornecedor }}
                         </li>
                         {% endfor %}
@@ -234,36 +228,25 @@
         const fornecedorId = document.getElementById('fornecedorId');
         const fornecedorDisplay = document.getElementById('fornecedorDisplay');
         const fornecedorDetails = document.getElementById('fornecedorDetails');
+        const fornecedorFields = {
+            nome: document.getElementById('fornecedorNome'),
+            fone: document.getElementById('fornecedorFone'),
+            site: document.getElementById('fornecedorSite'),
+            email: document.getElementById('fornecedorEmail'),
+            endereco: document.getElementById('fornecedorEndereco'),
+            cnpj: document.getElementById('fornecedorCnpj'),
+            contato: document.getElementById('fornecedorContato'),
+        };
         let selectedFornecedor = null;
 
-        if (fornecedorId.value) {
-            const fornecedorItem = fornecedorList.querySelector(`[data-id="${fornecedorId.value}"]`);
-            if (fornecedorItem) {
-                selectedFornecedor = {
-                    id: fornecedorItem.getAttribute('data-id'),
-                    nome: fornecedorItem.getAttribute('data-nome'),
-                    fone: fornecedorItem.getAttribute('data-fone'),
-                    site: fornecedorItem.getAttribute('data-site'),
-                    email: fornecedorItem.getAttribute('data-email'),
-                    rua: fornecedorItem.getAttribute('data-rua'),
-                    numero: fornecedorItem.getAttribute('data-numero'),
-                    cidade: fornecedorItem.getAttribute('data-cidade'),
-                    cep: fornecedorItem.getAttribute('data-cep'),
-                    estado: fornecedorItem.getAttribute('data-estado'),
-                    cnpj: fornecedorItem.getAttribute('data-cnpj'),
-                    contato: fornecedorItem.getAttribute('data-contato')
-                };
-                fornecedorItem.classList.add('selected-fornecedor');
-            }
-        }
-
-
+        // Função de pesquisa de fornecedores
         searchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase();
             const items = fornecedorList.getElementsByClassName('fornecedor-list-item');
 
             Array.from(items).forEach(item => {
                 const nome = item.getAttribute('data-nome').toLowerCase();
+
                 if (nome.includes(searchTerm)) {
                     item.style.display = '';
                 } else {
@@ -272,15 +255,18 @@
             });
         });
 
+        // Função para selecionar fornecedor ao clicar na lista
         fornecedorList.addEventListener('click', function (event) {
             const clickedItem = event.target.closest('.fornecedor-list-item');
 
             if (clickedItem) {
+                // Remove a seleção anterior, se houver
                 const previousSelected = fornecedorList.querySelector('.selected-fornecedor');
                 if (previousSelected) {
                     previousSelected.classList.remove('selected-fornecedor');
                 }
 
+                // Marca o item como selecionado
                 clickedItem.classList.add('selected-fornecedor');
                 selectedFornecedor = {
                     id: clickedItem.getAttribute('data-id'),
@@ -294,44 +280,56 @@
                     cep: clickedItem.getAttribute('data-cep'),
                     estado: clickedItem.getAttribute('data-estado'),
                     cnpj: clickedItem.getAttribute('data-cnpj'),
-                    contato: clickedItem.getAttribute('data-contato')
+                    contato: clickedItem.getAttribute('data-contato'),
                 };
 
-                // Atualiza o campo hidden do fornecedor
-                fornecedorId.value = selectedFornecedor.id;
-
-                document.getElementById('fornecedorNome').textContent = selectedFornecedor.nome;
-                document.getElementById('fornecedorFone').textContent = selectedFornecedor.fone;
-                document.getElementById('fornecedorSite').textContent = selectedFornecedor.site;
-                document.getElementById('fornecedorEmail').textContent = selectedFornecedor.email;
-                document.getElementById('fornecedorRua').textContent = selectedFornecedor.rua;
-                document.getElementById('fornecedorNumero').textContent = selectedFornecedor.numero;
-                document.getElementById('fornecedorCidade').textContent = selectedFornecedor.cidade;
-                document.getElementById('fornecedorCep').textContent = selectedFornecedor.cep;
-                document.getElementById('fornecedorEstado').textContent = selectedFornecedor.estado;
-                document.getElementById('fornecedorCnpj').textContent = selectedFornecedor.cnpj;
-                document.getElementById('fornecedorContato').textContent = selectedFornecedor.contato;
-
+                // Atualiza o display do fornecedor selecionado
                 fornecedorDisplay.textContent = `Fornecedor Selecionado: ${selectedFornecedor.nome}`;
+
+                // Atualiza os detalhes do fornecedor
+                fornecedorFields.nome.textContent = selectedFornecedor.nome;
+                fornecedorFields.fone.textContent = selectedFornecedor.fone;
+                fornecedorFields.site.textContent = selectedFornecedor.site || 'Não informado';
+                fornecedorFields.email.textContent = selectedFornecedor.email || 'Não informado';
+                fornecedorFields.endereco.textContent = `${selectedFornecedor.rua}, Nº ${selectedFornecedor.numero}, ${selectedFornecedor.cidade} - ${selectedFornecedor.estado}`;
+                fornecedorFields.cnpj.textContent = selectedFornecedor.cnpj || 'Não informado';
+                fornecedorFields.contato.textContent = selectedFornecedor.contato || 'Não informado';
+
                 fornecedorDetails.style.display = 'table';
             }
         });
 
         selectFornecedorBtn.addEventListener('click', function () {
             if (selectedFornecedor) {
-                fornecedorId.value = selectedFornecedor.id;
-                fornecedorDisplay.textContent = `Fornecedor Selecionado: ${selectedFornecedor.nome}`;
-                const modalElement = document.getElementById('fornecedorModal');
-                const modal = modalElement ? bootstrap.Modal.getInstance(modalElement) : null;
-                if (modal) {
-                    modal.hide();
-                }
+                // Adicione um console.log para debug
+                console.log('Fornecedor ID sendo definido:', selectedFornecedor.id);
+                
+                // Defina o valor do campo hidden
+                document.getElementById('fornecedorId').value = selectedFornecedor.id;
+                
+                // Verifique se o valor foi definido
+                console.log('Valor após definição:', document.getElementById('fornecedorId').value);
+
+                // Atualiza o display
+                fornecedorDisplay.textContent = `Fornecedor Selecionado: ${selectedFornecedor.nome} (ID: ${selectedFornecedor.id})`;
+
+                // Fechar o modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('fornecedorModal'));
+                modal.hide();
             } else {
                 alert('Por favor, selecione um fornecedor');
             }
         });
     });
+
+    // Adicione uma verificação antes do submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Adicione um console.log para debug
+        console.log('Valor do fornecedor no submit:', document.getElementById('fornecedorId').value);
+    });
 </script>
 
+<!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 {% endblock %}
