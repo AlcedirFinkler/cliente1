@@ -8,8 +8,14 @@ from .models import CadastroPendente
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.core.cache import cache
+from django.db.models import Q, F
+from CadFornecedor.models import Fornecedor
+from gestaoOS.models import Chamado
+from GestaoPrev.models import ManutencaoPreventiva
+from cadEstoque.models import Pecas
+from django.contrib.auth.models import User
 
 TENTATIVAS_MAXIMAS = 5
 DURAÇÃO_DO_BLOQUEIO = timedelta(minutes=5)
@@ -85,7 +91,7 @@ def login_view(request):
                         #return redirect('tecnicos_home')
                     elif group_name == "Gestor":
                         print('Renderiza gestores!')
-                        return redirect('modulos')
+                        return redirect('selecao_modulos')
                         #return redirect('gestores_home')
                 else:
                     aumentar_numero_de_tentativas(username)
@@ -207,4 +213,28 @@ def modulos(request):
         ]
         return render(request, 'usuarios/selecao_modulos.html', {'modules': modules})
 
+@login_required
+def selecao_modulos(request):
+    manutencoes_atrasadas = ManutencaoPreventiva.objects.filter(
+        data_proxima_manutencao__lt=datetime.now(), status='atrasada'
+    )
 
+    oss_pendentes = Chamado.objects.filter(status='pendente')
+
+    pecas_estoque_minimo = Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo'))
+
+    usuarios_pendentes = User.objects.filter(is_active=False)
+
+    duas_semanas = datetime.now() + timedelta(weeks=2)
+    proximas_manutencoes = ManutencaoPreventiva.objects.filter(
+        data_proxima_manutencao__lte=duas_semanas, status='programada'
+    )
+
+    context = {
+        'manutencoes_atrasadas': manutencoes_atrasadas,
+        'oss_pendentes': oss_pendentes,
+        'pecas_estoque_minimo': pecas_estoque_minimo,
+        'usuarios_pendentes': usuarios_pendentes,
+        'proximas_manutencoes': proximas_manutencoes,
+    }
+    return render(request, 'usuarios/selecao_modulos.html', context)

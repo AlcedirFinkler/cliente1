@@ -1,9 +1,6 @@
 from cadEstoque import views
 from . import views
 from cadEstoque.views import teste
-
-
-
 from django.urls import path
 
 urlpatterns = [

@@ -45,7 +45,7 @@
         }
 
         .sidenav .bottom-links .logout-link {
-          color: rgb(253, 92, 92);
+          color: rgb(150, 0, 0);
         }
 
         .sidenav .bottom-links .logout-link:hover {
@@ -139,13 +139,14 @@
     <div class="sidenav">
         <img src="{% static 'images/logo.png' %}" alt="Logo">
         <h1>Módulos</h1>
+        <a href="{% url 'selecao_modulos' %}" class="action-link">Tela Inicial</a>
         <a href="{% url 'tela_inicial' %}" class="action-link"> Gestão OSs</a>
         <a href="{% url 'listar_manutencoes' %}" class="action-link"> Mant. Preventivas</a>
         <a href="{% url 'cadEstoque' %}" class="action-link"> Estoque</a>
         <a href="{% url 'CadEquip' %}" class="action-link"> Equipamentos</a>
         <a href="{% url 'CadFornecedor' %}" class="action-link"> Fornecedores</a>
         <a href="{% url 'listar_usuarios_pendentes' %}" class="action-link"> Usuários</a>
-        <a href="{% url 'relatorios_index' %}" class="action-link"> Relatórios:</a>
+        <a class="action-link"> Relatórios:</a>
         <div class="sub-list">
             <a href="{% url 'relatorio_chamados' %}">- Chamados</a>
             <a href="{% url 'relatorio_pecas' %}">- Peças</a>
@@ -153,7 +154,6 @@
             <a href="{% url 'relatorio_indicadores' %}">- Indicadores</a>
         </div>
         <div class="bottom-links">
-            <a href="{% url 'modulos' %}" class="action-link">Voltar</a>
             <a href="{% url 'login' %}" class="action-link logout-link">Sair</a>
         </div>
       </div>
