@@ -21,6 +21,9 @@ from gestaoOS.models import Chamado, Acao, AcaoColaborador
 from GestaoPrev.models import ManutencaoPreventiva, PecasManutencao
 from gestaoUsuarios.models import CadastroPendente
 
+import os
+
+# Inseridos para gerar arquivo PDF
 from reportlab.lib.pagesizes import landscape, A4
 from reportlab.platypus import Image, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
@@ -29,7 +32,17 @@ from reportlab.lib.units import cm
 from reportlab.platypus import PageTemplate, BaseDocTemplate, NextPageTemplate
 from reportlab.platypus.frames import Frame
 
-import os
+# Inseridos para gerar arquivo excell
+import openpyxl
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+
+# Inseridos para geração de gráficos
+import json
+from collections import defaultdict
+from django.db.models import Avg
+from decimal import Decimal
+
+
 
 # Configuração da margem direita
 margem_direita = 36  # Margem direita configurada em pontos (1,27 cm)
@@ -41,137 +54,70 @@ largura_disponivel = largura_total_pagina - margem_direita - margem_esquerda
 def relatorios_index(request):
     return render(request, 'relatorios/base_rel.html')
 
-def gerar_relatorio_chamados(request):
-    chamados = Chamado.objects.all()
-    status = request.GET.get('status')
-    tecnico = request.GET.get('tecnico')
-    setor = request.GET.get('setor')
-    equipamento = request.GET.get('equipamento')
-    dias = request.GET.get('dias', 30)
-    
-    if status:
-        chamados = chamados.filter(status=status)
-    if tecnico:
-        chamados = chamados.filter(tecnico__username=tecnico)
-    if setor:
-        chamados = chamados.filter(setor__nome=setor)
-    if equipamento:
-        chamados = chamados.filter(equipamento__nome=equipamento)
-    
-    data_limite = timezone.now() - timedelta(days=int(dias))
-    chamados = chamados.filter(data_criacao__gte=data_limite)
-    
-    if request.GET.get('imprimir'):
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="relatorio_chamados.pdf"'
+def gerar_excel_indicadores(indicadores):
+    """
+    Gera um arquivo Excel com os indicadores de manutenção
+    """
+    # Cria um novo workbook e seleciona a primeira planilha
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Indicadores de Manutenção"
 
-        # Configuração de margens
-        doc = BaseDocTemplate(
-            response, pagesize=landscape(A4),
-            leftMargin=margem_esquerda, rightMargin=margem_direita,
-            topMargin=36, bottomMargin=36
-        )
+    # Define estilos
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="007BFF", end_color="007BFF", fill_type="solid")
+    border = Border(
+        left=Side(style='thin'), 
+        right=Side(style='thin'), 
+        top=Side(style='thin'), 
+        bottom=Side(style='thin')
+    )
 
-        def cabecalho(canvas, doc):
-            canvas.saveState()
-            
-            # Título centralizado para página paisagem
-            canvas.setFont("Helvetica-Bold", 14)
-            canvas.drawCentredString(landscape(A4)[0] / 2, landscape(A4)[1] - 50, "Relatório de Chamados")
+    # Cabeçalho
+    headers = [
+        "TAG", "Equipamento", "Classe", "Setor", 
+        "Mês", "Ano", "Tempo Operação (h)", 
+        "Chamados Corretivos", "Horas Paradas", 
+        "MTBF (h)", "MTTR (h)", "Disponibilidade (%)"
+    ]
 
-            # Data no canto inferior direito
-            data_atual = datetime.now().strftime("%d/%m/%Y")
-            canvas.setFont("Helvetica", 8)
-            canvas.drawRightString(landscape(A4)[0] - doc.rightMargin, landscape(A4)[1] - 60, data_atual)
+    # Adiciona cabeçalho
+    for col, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = border
+        cell.alignment = Alignment(horizontal='center', vertical='center')
 
-            # Número da página
-            canvas.drawRightString(landscape(A4)[0] - doc.rightMargin, landscape(A4)[1] - 30, f"Página {doc.page}")
+    # Adiciona dados
+    for row, indicador in enumerate(indicadores, start=2):
+        ws.cell(row=row, column=1, value=indicador['equipamento'].tag or '-')
+        ws.cell(row=row, column=2, value=indicador['equipamento'].nome)
+        ws.cell(row=row, column=3, value=indicador['equipamento'].classe or '-')
+        ws.cell(row=row, column=4, value=str(indicador['equipamento'].setor))
+        ws.cell(row=row, column=5, value=indicador['mes'])
+        ws.cell(row=row, column=6, value=indicador['ano'])
+        ws.cell(row=row, column=7, value=indicador['tempo_operacao'])
+        ws.cell(row=row, column=8, value=indicador['chamados_corretivos'])
+        ws.cell(row=row, column=9, value=indicador['horas_paradas'])
+        ws.cell(row=row, column=10, value=indicador['mtbf'])
+        ws.cell(row=row, column=11, value=indicador['mttr'])
+        ws.cell(row=row, column=12, value=indicador['disponibilidade'])
 
-            canvas.restoreState()
+    # Ajusta largura das colunas
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
 
-        # Configuração do frame e template para paisagem
-        frame = Frame(
-            doc.leftMargin,
-            doc.bottomMargin,
-            doc.width,
-            doc.height - 50,
-            id='normal'
-        )
-        template = PageTemplate(id='pagina1', frames=frame, onPage=cabecalho)
-        doc.addPageTemplates([template])
-
-        # Estilos e elementos do PDF
-        styles = getSampleStyleSheet()
-        elementos = []
-
-        # Adiciona filtros aplicados
-        filtros = []
-        if status:
-            filtros.append(f"Status: {status}")
-        if tecnico:
-            filtros.append(f"Técnico: {tecnico}")
-        if setor:
-            filtros.append(f"Setor: {setor}")
-        if equipamento:
-            filtros.append(f"Equipamento: {equipamento}")
-        if filtros:
-            elementos.append(Paragraph("Filtros aplicados: " + ", ".join(filtros), styles['Normal']))
-            elementos.append(Spacer(1, 20))
-
-        styles = getSampleStyleSheet()
-        style = styles['Normal']
-        style.fontSize = 10
-        style.alignment = 1  # 1 é para centralizar o texto
-        # Dados da tabela
-        data = [['Titulo', 'Status', 'Técnico', 'Setor', 'Equipamento', 'Data Criação']]
-        for chamado in chamados:
-            data.append([
-                Paragraph(chamado.titulo, style),
-                Paragraph(chamado.get_status_display(), style),
-                Paragraph(str(chamado.tecnico) if chamado.tecnico else 'N/A', style),
-                Paragraph(str(chamado.setor), style),
-                Paragraph(str(chamado.equipamento) if chamado.equipamento else 'N/A', style),
-                Paragraph(chamado.data_criacao.strftime('%d/%m/%Y'), style)
-            ])
-        
-        # Calcula larguras das colunas em função da largura disponível
-        colWidths_table = [
-            largura_disponivel * 0.47,  # Título
-            largura_disponivel * 0.15,  # Status
-            largura_disponivel * 0.15,  # Técnico
-            largura_disponivel * 0.15,  # Setor
-            largura_disponivel * 0.30,  # Equipamento
-            largura_disponivel * 0.15   # Data Criação
-        ]
-
-        # Cria a tabela com as larguras definidas
-        table = Table(data, colWidths=colWidths_table)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-
-        # Adiciona a tabela ao documento
-        elementos.append(table)
-
-        # Constrói o documento
-        doc.build(elementos)
-        return response
-
-    context = {
-        'chamados': chamados,
-        'statuses': Chamado.STATUS_CHOICES,
-        'usuarios': User.objects.filter(groups__name='Técnico'),
-        'setores': Setor.objects.all(),
-        'equipamentos': Equipamento.objects.all(),
-    }
-    return render(request, 'relatorios/chamados.html', context)
+    return wb
 
 def gerar_relatorio_pecas(request):
     prazo_dias = int(request.GET.get('prazo', 30))  # Padrão configurado para 30 dias
@@ -496,19 +442,11 @@ def gerar_relatorio_tecnicos(request):
 def gerar_relatorio_indicadores(request):
     # Obtém o primeiro dia do mês atual
     hoje = timezone.now()
-    primeiro_dia_mes_atual = hoje.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    # Obtém os três meses completos anteriores
-    ultimo_mes = primeiro_dia_mes_atual - timedelta(days=1)
-    penultimo_mes = ultimo_mes.replace(day=1) - timedelta(days=1)
-    antepenultimo_mes = penultimo_mes.replace(day=1) - timedelta(days=1)
-    
-    # Lista dos meses a serem analisados
     meses_analise = [
-        (antepenultimo_mes.year, antepenultimo_mes.month),
-        (penultimo_mes.year, penultimo_mes.month),
-        (ultimo_mes.year, ultimo_mes.month)
-    ]
+    (hoje.year if hoje.month > i else hoje.year - 1, (hoje.month - i) % 12 or 12)
+    for i in range(12)
+][::-1]
+
     
     # Debug dos meses sendo analisados
     print("\nMeses em análise:")
@@ -549,6 +487,9 @@ def gerar_relatorio_indicadores(request):
 
     # Lista para armazenar os indicadores
     indicadores = []
+    # Dicionários para armazenar os indicadores por setor e classe
+    dados_por_setor = defaultdict(lambda: defaultdict(list))
+    dados_por_classe = defaultdict(lambda: defaultdict(list))
 
     # Processamento por equipamento e por mês
     for equipamento in equipamentos:
@@ -557,12 +498,9 @@ def gerar_relatorio_indicadores(request):
         for ano, mes in meses_analise:
             print(f"\nProcessando mês {mes}/{ano}")
             
-            # Obtém o primeiro e último dia do mês
             primeiro_dia = timezone.datetime(ano, mes, 1)
-            if mes == 12:
-                ultimo_dia = timezone.datetime(ano + 1, 1, 1) - timedelta(days=1)
-            else:
-                ultimo_dia = timezone.datetime(ano, mes + 1, 1) - timedelta(days=1)
+            ultimo_dia = (primeiro_dia.replace(month=mes % 12 + 1, day=1) - timedelta(days=1)) if mes != 12 else primeiro_dia.replace(year=ano + 1, month=1, day=1) - timedelta(days=1)
+
 
             # Obtém histórico de horas do mês
             historico_horas = HistoricoHorasMensais.objects.filter(
@@ -623,7 +561,30 @@ def gerar_relatorio_indicadores(request):
                 'disponibilidade': round(disponibilidade, 2)
             })
 
-    if request.GET.get('imprimir'):
+            setor = equipamento.setor.nome
+            classe = equipamento.classe
+
+            dados_por_setor[setor]['mtbf'].append(mtbf)
+            dados_por_setor[setor]['mttr'].append(mttr)
+            dados_por_setor[setor]['disponibilidade'].append(disponibilidade)
+
+            dados_por_classe[classe]['mtbf'].append(mtbf)
+            dados_por_classe[classe]['mttr'].append(mttr)
+            dados_por_classe[classe]['disponibilidade'].append(disponibilidade)
+
+    meses_labels = [f"{mes}/{ano}" for ano, mes in meses_analise]
+
+    if request.GET.get('exportar_excel'):
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="relatorio_indicadores.xlsx"'
+        
+        wb = gerar_excel_indicadores(indicadores)
+        wb.save(response)
+        return response
+    
+    elif request.GET.get('imprimir'):
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="relatorio_indicadores.pdf"'
 
@@ -766,16 +727,81 @@ def gerar_relatorio_indicadores(request):
         # Constrói o documento
         doc.build(elementos)
         return response
+     
+    equipamentos_selecionados = equipamentos.filter(
+        Q(nome__icontains=nome_equipamento) | Q(tag__icontains=tag)
+    )
 
-    # Renderização do template
+    dados_equip_selecionados = {}
+
+    for equipamento in equipamentos_selecionados:
+        dados_equip_selecionados[equipamento.nome] = {
+            'mtbf': [],
+            'mttr': [],
+            'disponibilidade': []
+        }
+        for ano, mes in meses_analise:
+            historico_horas = HistoricoHorasMensais.objects.filter(
+                equipamento=equipamento, ano=ano, mes=mes
+            ).first()
+            tempo_operacao = float(historico_horas.horas_trabalhadas) if historico_horas else 0.0
+
+            chamados_corretivos = Chamado.objects.filter(
+                equipamento=equipamento, tipo_manutencao='corretiva',
+                data_criacao__year=ano, data_criacao__month=mes
+            )
+            chamados_count = chamados_corretivos.count()
+            tempo_parada_total = sum(
+                Acao.objects.filter(chamado=chamado).aggregate(Sum('duracao'))['duracao__sum'] or 0
+                for chamado in chamados_corretivos
+            )
+
+            # Convert both values to Decimal explicitly
+            tempo_operacao = Decimal(str(tempo_operacao))
+            tempo_parada_total = Decimal(str(tempo_parada_total))
+
+            # Convert both to Decimal for consistent arithmetic
+            mtbf = Decimal(str(mtbf))  # Convert float to string then to Decimal
+            mttr = Decimal(str(mttr))  # Assuming mttr might already be Decimal, but we ensure
+
+            if chamados_count > 0:
+                mtbf = tempo_operacao / chamados_count
+                mttr = tempo_parada_total / chamados_count
+            else:
+                mtbf = Decimal(tempo_operacao) if tempo_operacao > 0 else Decimal('0.0')
+                mttr = Decimal('0.0')
+
+            disponibilidade = (mtbf / (mtbf + mttr) * Decimal('100.0')) if (mtbf + mttr) > 0 else Decimal('100.0')
+
+            dados_equip_selecionados[equipamento.nome]['mtbf'].append(round(mtbf, 2))
+            dados_equip_selecionados[equipamento.nome]['mttr'].append(round(mttr, 2))
+            dados_equip_selecionados[equipamento.nome]['disponibilidade'].append(round(disponibilidade, 2))
+
+    dados_mtbf_equip = {k: list(map(float, v['mtbf'])) for k, v in dados_equip_selecionados.items()}
+    dados_mttr_equip = {k: list(map(float, v['mttr'])) for k, v in dados_equip_selecionados.items()}
+    dados_disp_equip = {k: list(map(float, v['disponibilidade'])) for k, v in dados_equip_selecionados.items()}
+        
     context = {
         'indicadores': indicadores,
         'setores': Setor.objects.all(),
         'classes': list(set(Equipamento.objects.values_list('classe', flat=True).distinct())),
-        'meses_analise': meses_analise
-    }
+        'meses_analise': meses_analise,
+        'meses_labels': json.dumps(meses_labels),
+        'dados_mtbf_setor': json.dumps({k: v['mtbf'] for k, v in dados_por_setor.items()}, default=list),
+        'dados_mttr_setor': json.dumps({k: v['mttr'] for k, v in dados_por_setor.items()}, default=list),
+        'dados_disp_setor': json.dumps({k: v['disponibilidade'] for k, v in dados_por_setor.items()}, default=list),
+        'dados_mtbf_classe': json.dumps({k: v['mtbf'] for k, v in dados_por_classe.items()}, default=list),
+        'dados_mttr_classe': json.dumps({k: v['mttr'] for k, v in dados_por_classe.items()}, default=list),
+        'dados_disp_classe': json.dumps({k: v['disponibilidade'] for k, v in dados_por_classe.items()}, default=list),
+        'dados_mtbf_equip': json.dumps(dados_mtbf_equip),
+        'dados_mttr_equip': json.dumps(dados_mttr_equip),
+        'dados_disp_equip': json.dumps(dados_disp_equip),
+        'equipamentos_selecionados': list(dados_equip_selecionados.keys()),  # Lista dos equipamentos filtrados
+        }
     
     return render(request, 'relatorios/indicadores.html', context)
+
+    
 
 register = template.Library()
 

@@ -1,6 +1,5 @@
 <!-- indicadores.html from app relatorios-->
 {% extends 'base.html' %}
-{% block title %}GESTOR - Relatórios{% endblock %}
 
 {% block content %}
 <!DOCTYPE html>
@@ -40,32 +39,20 @@
             background-color: #007BFF;
             color: white;
         }
-        .sidenav a, .sidenav h1 {
-            all: unset;
-            display: block;
-            text-decoration: none;
-            font-family: 'Roboto', sans-serif;
+        .chart-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap; /* In case the viewport is too small */
+            margin-bottom: 20px; /* Space between rows */
         }
-        .sidenav a {
-            padding-left: 32px;
-            padding-bottom: 5px;
-            font-size: 20px;
-            color: #818181;
+
+        .chart-container {
+            width: calc(33.333% - 10px); /* 33.333% minus some margin for spacing */
+            margin: 5px; /* Small margin for spacing between charts */
         }
-        .sidenav h1 {
-            padding-top: 14px;
-            padding-bottom: 11px;
-            padding-left: 32px;
-            font-size: 30px;
-            color: #c4c4c4;
-            font-weight: bold;
-        }
-        
-        .sidenav .bottom-links {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            margin-bottom: 18px;
+
+        .chart-container canvas {
+            max-width: 100%; /* Ensure charts don't overflow their container */
         }
     </style>
 </head>
@@ -111,7 +98,8 @@
             </div>
             <div class="text-center">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
-                <button type="submit" class="btn btn-secondary" name="imprimir" value="true">Imprimir</button>
+                <button type="submit" class="btn btn-secondary" name="imprimir" value="true">Imprimir PDF</button>
+                <button type="submit" class="btn btn-success" name="exportar_excel" value="true">Exportar Excel</button>
             </div>
         </form>
 
@@ -147,8 +135,96 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- First row of charts -->
+        <div class="chart-row">
+            <div class="chart-container"><canvas id="graficoMTBFSetor"></canvas></div>
+            <div class="chart-container"><canvas id="graficoMTTRSetor"></canvas></div>
+            <div class="chart-container"><canvas id="graficoDisponibilidadeSetor"></canvas></div>
+        </div>
+
+        <!-- Second row of charts -->
+        <div class="chart-row">
+            <div class="chart-container"><canvas id="graficoMTBFClasse"></canvas></div>
+            <div class="chart-container"><canvas id="graficoMTTRClasse"></canvas></div>
+            <div class="chart-container"><canvas id="graficoDisponibilidadeClasse"></canvas></div>
+        </div>
+  
+        <!-- Gráficos por Equipamento -->
+        <div id="graficosEquipamentos"></div>
+        
+
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const mesesLabels = JSON.parse('{{ meses_labels|escapejs }}');
+
+        function criarGrafico(id, titulo, dados, metrica) {
+            const ctx = document.getElementById(id).getContext('2d');
+            const datasets = Object.keys(dados).map((key, index) => ({
+                label: key,
+                data: dados[key],
+                borderColor: `hsl(${index * 60}, 70%, 50%)`,
+                backgroundColor: `hsl(${index * 60}, 70%, 50%)`,
+                fill: false,
+                tension: 0.3
+            }));
+
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels: mesesLabels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: { 
+                        legend: { position: 'top' },
+                        title: { display: true, text: titulo }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: metrica.toUpperCase() } },
+                        x: { title: { display: true, text: 'Mês/Ano' } }
+                    }
+                }
+            });
+        }
+
+        criarGrafico("graficoMTBFSetor", "MTBF por Setor", JSON.parse('{{ dados_mtbf_setor|escapejs }}'), 'mtbf');
+        criarGrafico("graficoMTTRSetor", "MTTR por Setor", JSON.parse('{{ dados_mttr_setor|escapejs }}'), 'mttr');
+        criarGrafico("graficoDisponibilidadeSetor", "Disponibilidade por Setor", JSON.parse('{{ dados_disp_setor|escapejs }}'), 'disponibilidade');
+        criarGrafico("graficoMTBFClasse", "MTBF por Classe", JSON.parse('{{ dados_mtbf_classe|escapejs }}'), 'mtbf');
+        criarGrafico("graficoMTTRClasse", "MTTR por Classe", JSON.parse('{{ dados_mttr_classe|escapejs }}'), 'mttr');
+        criarGrafico("graficoDisponibilidadeClasse", "Disponibilidade por Classe", JSON.parse('{{ dados_disp_classe|escapejs }}'), 'disponibilidade');
+
+        // Gráficos por equipamento
+        const dadosEquipamentosMTBF = JSON.parse('{{ dados_mtbf_equip|escapejs }}');
+        const dadosEquipamentosMTTR = JSON.parse('{{ dados_mttr_equip|escapejs }}');
+        const dadosEquipamentosDisp = JSON.parse('{{ dados_disp_equip|escapejs }}');
+
+        const containerGraficos = document.getElementById("graficosEquipamentos");
+
+        Object.keys(dadosEquipamentosMTBF).forEach((equipamento, index) => {
+            const chartContainer = document.createElement("div");
+            chartContainer.classList.add("chart-row");
+
+            chartContainer.innerHTML = `
+                <div class="chart-container">
+                    <canvas id="graficoMTBFEquipamento_${index}"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="graficoMTTREquipamento_${index}"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="graficoDisponibilidadeEquipamento_${index}"></canvas>
+                </div>
+            `;
+
+            containerGraficos.appendChild(chartContainer);
+
+            criarGrafico(`graficoMTBFEquipamento_${index}`, `MTBF - ${equipamento}`, { [equipamento]: dadosEquipamentosMTBF[equipamento] }, 'mtbf');
+            criarGrafico(`graficoMTTREquipamento_${index}`, `MTTR - ${equipamento}`, { [equipamento]: dadosEquipamentosMTTR[equipamento] }, 'mttr');
+            criarGrafico(`graficoDisponibilidadeEquipamento_${index}`, `Disponibilidade - ${equipamento}`, { [equipamento]: dadosEquipamentosDisp[equipamento] }, 'disponibilidade');
+        });
+    </script>
 </body>
 </html>
 {% endblock %}
