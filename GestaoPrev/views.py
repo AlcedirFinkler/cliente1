@@ -246,7 +246,7 @@ def listar_manutencoes(request):
     calendars = []
     maintenance_dates = {}
 
-    for i in range(6):
+    for i in range(12):
         target_date = today + timedelta(days=i*31)
         year = target_date.year
         month = target_date.month

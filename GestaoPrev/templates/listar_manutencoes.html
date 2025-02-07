@@ -14,6 +14,13 @@
         font-size: 20px;
         text-align: center;
     }
+    .content-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
 
     .content-container .delete-button {
         background-color: rgb(253, 92, 92);
@@ -23,11 +30,13 @@
         background-color: rgb(255, 0 ,0);
     }
 
-    .calendar-sidebar {
+        .calendar-sidebar {
+        height: 20vh;
+        overflow-y: auto;
         padding: 15px;
         background-color: #f8f9fa;
         border-radius: 8px;
-        margin-top: 20px;
+        margin-top: auto;
     }
 
     .calendar {
@@ -36,6 +45,36 @@
         margin-bottom: 20px;
         font-family: 'Roboto', sans-serif;
     }
+
+.maintenance-table-container {
+    height: 60vh;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.calendar-sidebar {
+    height: 40vh;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: auto;
+}
+
+    /* Ajuste para manter o cabeçalho da tabela fixo */
+    .maintenance-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .maintenance-table thead th {
+        position: sticky;
+        top: 0;
+        background-color: white;
+        z-index: 1;
+    }
+
 
     .calendar th, .calendar td {
         padding: 10px;
@@ -97,6 +136,34 @@
     .scroll-to-bottom {
         bottom: 20px;
     }
+
+    .calendar-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.calendar-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.calendar-month {
+    flex: 1;
+    min-width: 0; /* Permite que os meses sejam redimensionados igualmente */
+}
+
+.calendar-month .calendar {
+    width: 100%;
+    font-size: 0.8em; /* Reduz o tamanho da fonte para caber mais informação */
+}
+
+.calendar-month .month-title {
+    font-size: 1em;
+    text-align: center;
+    margin-bottom: 5px;
+}
 </style>
 
 <div class="content-container">
@@ -162,8 +229,9 @@
         </form>
     </table>
 
+    <div class="maintenance-table-container">
     <!-- Tabela de Manutenções -->
-    <table border="1">
+    <table class="maintenance-table" border="1">
         <thead>
             <tr>
                 <th>TAG</th>
@@ -198,45 +266,130 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 
     <div class="calendar-sidebar" id="calendarSection">
-        {% for cal in calendars %}
-        <div class="month-calendar">
-            <h3 class="month-title">{{ cal.month_name }} {{ cal.year }}</h3>
-            <table class="calendar" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
-                <thead>
-                    <tr>
-                        <th>Dom</th>
-                        <th>Seg</th>
-                        <th>Ter</th>
-                        <th>Qua</th>
-                        <th>Qui</th>
-                        <th>Sex</th>
-                        <th>Sáb</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for week in cal.calendar %}
-                    <tr>
-                        {% for day in week %}
-                        {% if day != 0 %}
-                        <td class="{% if day == today.day and cal.month == today.month and cal.year == today.year %}today{% endif %}" 
-                            data-date="{{ day }}"
-                            data-year="{{ cal.year }}"
-                            data-month="{{ cal.month }}"
-                            onclick="filterByDate(this)">
-                            {{ day }}
-                        </td>
-                        {% else %}
-                        <td></td>
-                        {% endif %}
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="calendar-grid">
+            <div class="calendar-row">
+                {% for cal in calendars|slice:":4" %}
+                <div class="calendar-month">
+                    <h3 class="month-title">{{ cal.month_name }} {{ cal.year }}</h3>
+                    <table class="calendar" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
+                        <thead>
+                            <tr>
+                                <th>Dom</th>
+                                <th>Seg</th>
+                                <th>Ter</th>
+                                <th>Qua</th>
+                                <th>Qui</th>
+                                <th>Sex</th>
+                                <th>Sáb</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in cal.calendar %}
+                            <tr>
+                                {% for day in week %}
+                                {% if day != 0 %}
+                                <td class="{% if day == today.day and cal.month == today.month and cal.year == today.year %}today{% endif %}" 
+                                    data-date="{{ day }}"
+                                    data-year="{{ cal.year }}"
+                                    data-month="{{ cal.month }}"
+                                    onclick="filterByDate(this)">
+                                    {{ day }}
+                                </td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+    
+            <div class="calendar-row">
+                {% for cal in calendars|slice:"4:8" %}
+                <div class="calendar-month">
+                    <h3 class="month-title">{{ cal.month_name }} {{ cal.year }}</h3>
+                    <table class="calendar" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
+                        <thead>
+                            <tr>
+                                <th>Dom</th>
+                                <th>Seg</th>
+                                <th>Ter</th>
+                                <th>Qua</th>
+                                <th>Qui</th>
+                                <th>Sex</th>
+                                <th>Sáb</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in cal.calendar %}
+                            <tr>
+                                {% for day in week %}
+                                {% if day != 0 %}
+                                <td class="{% if day == today.day and cal.month == today.month and cal.year == today.year %}today{% endif %}" 
+                                    data-date="{{ day }}"
+                                    data-year="{{ cal.year }}"
+                                    data-month="{{ cal.month }}"
+                                    onclick="filterByDate(this)">
+                                    {{ day }}
+                                </td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
+    
+            <div class="calendar-row">
+                {% for cal in calendars|slice:"8:" %}
+                <div class="calendar-month">
+                    <h3 class="month-title">{{ cal.month_name }} {{ cal.year }}</h3>
+                    <table class="calendar" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
+                        <thead>
+                            <tr>
+                                <th>Dom</th>
+                                <th>Seg</th>
+                                <th>Ter</th>
+                                <th>Qua</th>
+                                <th>Qui</th>
+                                <th>Sex</th>
+                                <th>Sáb</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in cal.calendar %}
+                            <tr>
+                                {% for day in week %}
+                                {% if day != 0 %}
+                                <td class="{% if day == today.day and cal.month == today.month and cal.year == today.year %}today{% endif %}" 
+                                    data-date="{{ day }}"
+                                    data-year="{{ cal.year }}"
+                                    data-month="{{ cal.month }}"
+                                    onclick="filterByDate(this)">
+                                    {{ day }}
+                                </td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div>
         </div>
-        {% endfor %}
     </div>
 </div>
 
