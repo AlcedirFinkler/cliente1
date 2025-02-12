@@ -134,13 +134,13 @@
                 <th>Técnico</th>
                 <th>Setor</th>
                 <th>Título</th>
-                <th>Descricao</th>
+                <th style="width: 10%">Descricao</th>
                 <th>Tipo de Manutenção</th>
                 <th>TAG</th>
                 <th>Equipamento</th>
                 <th>Data da Solicitação</th>
                 <th>Imagem</th>
-                <th style="width: 12%;">Ações</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -158,7 +158,7 @@
                 </td>
                 <td>{{ chamado.setor }}</td>
                 <td>{{ chamado.titulo }}</td>
-                <td>{{ chamado.descricao }}</td>
+                <td>{{ chamado.descricao|truncatechars:50 }}</td>
                 <td>{{ chamado.tipo_manutencao }}</td>
                 <td>{{ chamado.equipamento.tag }}</td>
                 <td>{{ chamado.equipamento }}</td>

@@ -82,7 +82,7 @@
             <tr>
                 <td>{{ fornecedor.fornecedor }}</td>
                 <td>{{ fornecedor.fornecedor_fone }}</td>
-                <td>{{ fornecedor.fornecedor_site }}</td>
+                <td>{{ fornecedor.fornecedor_site|truncatechars:65 }}</td>
                 <td>{{ fornecedor.fornecedor_email }}</td>
                 <td style="text-align: center;">
                     <a href="{% url 'editar_fornecedor' fornecedor.id %}" class="custom-button table-button">Editar</a>

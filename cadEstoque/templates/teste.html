@@ -84,11 +84,11 @@
             {% for peca in pecas %}
             <tr>
                 <td>{{ peca.id }}</td>
-                <td>{{ peca.descricao }}</td>
+                <td>{{ peca.descricao|truncatechars:50 }}</td>
                 <td>{{ peca.codigo }}</td>
                 <td>{{ peca.fornecedor }}</td>
                 <td>{{ peca.estoque_atual }}</td>
-                <td>{{ peca.preco }}</td>
+                <td>R${{ peca.preco }}</td>
                 <td>
                     {% if peca.foto %}
                         <a href="{{ request.scheme }}://{{ request.get_host }}{{ peca.foto_url }}" target="_blank">

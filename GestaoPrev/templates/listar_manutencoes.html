@@ -224,7 +224,7 @@
                 <td>{{ manutencao.equipamento.tag }}</td>
                 <td>{{ manutencao.equipamento.nome }}</td>
                 <td>{{ manutencao.equipamento.setor }}</td>
-                <td>{{ manutencao.descricao }}</td>
+                <td>{{ manutencao.descricao|truncatechars:50 }}</td>
                 <td>{{ manutencao.get_status_display }}</td>
                 <td>{{ manutencao.data_ultima_manutencao }}</td>
                 <td>{{ manutencao.data_proxima_manutencao }}</td>
