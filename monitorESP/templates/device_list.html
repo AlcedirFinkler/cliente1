@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GESTOR - Gestão de equipamentos{% endblock %}
+
+{% block content %}
+<head>
+    <title>Monitor ESP32/ESP8266</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .selected-equipment {
+            background-color: #d9edf7 !important; /* Adicionado !important para sobrescrever Bootstrap */
+            font-weight: bold; /* Opcional: para reforçar visualmente */
+        }
+        .loading::after {
+            content: " Carregando...";
+            font-style: italic;
+        }
+        .offset-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .equipment-list-item {
+            cursor: pointer; /* Indica que o item é clicável */
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    <h1 style="text-align: center;">Monitor de ESP32/ESP8266</h1>
+    <div class="container mt-5">
+        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#equipmentModal">
+            Adicionar Dispositivo ESP
+        </button>
+        
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Equipamento</th>
+                    <th>TAG</th>
+                    <th>Número do registro</th>
+                    <th>Horímetro (Hrs)</th>
+                    <th>Offset</th>
+                    <th>Horímetro Atual (Equip)</th>
+                    <th>Última atualização</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in devices %}
+                <tr>
+                    <td>{{ device.equipamento.nome }}</td>
+                    <td>{{ device.equipamento.tag }}</td>
+                    <td>{{ device.registration_number }}</td>
+                    <td>{{ device.horimetro|floatformat:1|default:"N/A" }}</td>
+                    <td>
+                        <div class="offset-container">
+                            <input type="number" class="offset-input form-control" value="{{ device.horimetro_offset }}"
+                                   data-device-id="{{ device.id }}" step="0.1">
+                        </div>
+                    </td>
+                    <td>
+                        <input type="number" class="horimetro-atual-input form-control" 
+                               value="{{ device.equipamento.horimetro_atual|floatformat:1 }}"
+                               data-device-id="{{ device.id }}"
+                               {% if device.atualizacao_automatica %}disabled{% endif %}>
+                    </td>
+                    <td>{{ device.last_update|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        <button class="btn toggle-auto {% if device.atualizacao_automatica %}btn-success{% else %}btn-warning{% endif %}"
+                                data-device-id="{{ device.id }}">
+                            {% if device.atualizacao_automatica %}Auto ativado{% else %}Auto desativado{% endif %}
+                        </button>
+                        <a href="{% url 'delete_device' device.id %}" class="btn btn-danger delete-btn" 
+                           onclick="return confirm('Tem certeza que deseja excluir este dispositivo?');">Excluir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Seleção de Equipamentos -->
+    <div class="modal fade" id="equipmentModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Selecionar Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="equipmentSearch" class="form-control mb-3" placeholder="Pesquisar por nome ou tag">
+                    <ul id="equipmentList" class="list-group">
+                        {% for equipamento in equipamentos %}
+                        <li class="list-group-item equipment-list-item" data-id="{{ equipamento.id }}" 
+                            data-nome="{{ equipamento.nome }}" data-tag="{{ equipamento.tag }}">
+                            {{ equipamento.nome }} - {{ equipamento.tag }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="selectEquipmentBtn">Selecionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Filtro de equipamentos no modal
+            $('#equipmentSearch').on('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                $('#equipmentList .equipment-list-item').each(function() {
+                    const nome = $(this).data('nome').toLowerCase();
+                    const tag = $(this).data('tag').toLowerCase();
+                    $(this).toggle(nome.includes(searchTerm) || tag.includes(searchTerm));
+                });
+            });
+
+            // Seleção de equipamento
+            $('#equipmentList').on('click', '.equipment-list-item', function(e) {
+                e.preventDefault(); // Evitar comportamento padrão
+                $('.equipment-list-item').removeClass('selected-equipment');
+                $(this).addClass('selected-equipment');
+                console.log('Equipamento selecionado:', $(this).data('id')); // Depuração
+            });
+
+            // Adicionar dispositivo
+            $('#selectEquipmentBtn').on('click', function() {
+                const selectedEquipment = $('.selected-equipment');
+                if (selectedEquipment.length) {
+                    const equipamentoId = selectedEquipment.data('id');
+                    const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+                    const $btn = $(this).addClass('loading');
+
+                    console.log('Tentando adicionar dispositivo com ID:', equipamentoId);
+
+                    $.ajax({
+                        url: '{% url "device_list" %}',
+                        type: 'POST',
+                        data: JSON.stringify({ equipamento_id: equipamentoId }),
+                        contentType: 'application/json',
+                        headers: { 'X-CSRFToken': csrfToken },
+                        success: function(response) {
+                            console.log('Resposta do servidor:', response);
+                            if (response.status === 'success') {
+                                $('#equipmentModal').modal('hide');
+                                location.reload();
+                            } else {
+                                alert('Erro: ' + response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Erro AJAX:', xhr.status, xhr.responseText);
+                            alert('Erro ao adicionar dispositivo: ' + (xhr.responseJSON?.message || xhr.statusText));
+                        },
+                        complete: function() {
+                            $btn.removeClass('loading');
+                        }
+                    });
+                } else {
+                    alert('Selecione um equipamento.');
+                }
+            });
+
+            // Alternar atualização automática
+            $('.toggle-auto').on('click', function() {
+                const $button = $(this);
+                const deviceId = $button.data('device-id');
+                const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+                const $horimetroAtualInput = $button.closest('tr').find('.horimetro-atual-input');
+                $button.addClass('loading');
+
+                $.ajax({
+                    url: `/toggle-auto-update/${deviceId}/`,
+                    type: 'POST',
+                    data: { csrfmiddlewaretoken: csrfToken },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $button.removeClass('btn-success btn-warning loading');
+                            if (response.atualizacao_automatica) {
+                                $button.addClass('btn-success').text('Auto ativado');
+                                $horimetroAtualInput.prop('disabled', true);
+                            } else {
+                                $button.addClass('btn-warning').text('Auto desativado');
+                                $horimetroAtualInput.prop('disabled', false);
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Erro AJAX:', xhr.status, xhr.responseText);
+                        alert('Erro ao alternar atualização: ' + (xhr.responseJSON?.message || xhr.statusText));
+                    }
+                });
+            });
+
+            // Atualizar offset
+            $('.offset-input').on('change', function() {
+                const $input = $(this);
+                const deviceId = $input.data('device-id');
+                const newOffset = parseFloat($input.val()) || 0;
+                const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+                const url = `/update-offset/${deviceId}/`;
+
+                console.log('Atualizando offset para deviceId:', deviceId, 'URL:', url);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: JSON.stringify({ offset: newOffset }),
+                    contentType: 'application/json',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    success: function(response) {
+                        console.log('Resposta do servidor:', response);
+                        if (response.status !== 'success') {
+                            alert('Erro ao atualizar offset: ' + response.message);
+                            $input.val($input.data('original-value'));
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Erro AJAX:', xhr.status, xhr.responseText);
+                        alert('Erro ao atualizar offset: ' + (xhr.responseJSON?.message || xhr.statusText));
+                        $input.val($input.data('original-value'));
+                    }
+                });
+            }).each(function() {
+                $(this).data('original-value', $(this).val());
+            });
+
+            // Atualizar horimetro_atual do Equipamento
+            $('.horimetro-atual-input').on('change', function() {
+                const $input = $(this);
+                const deviceId = $input.data('device-id');
+                const newHorimetroAtual = parseFloat($input.val()) || 0;
+                const $toggleButton = $input.closest('tr').find('.toggle-auto');
+                const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+                if ($toggleButton.hasClass('btn-success')) {
+                    alert('Desative a atualização automática para alterar o Horímetro Atual manualmente.');
+                    $input.val($input.data('original-value'));
+                    return;
+                }
+
+                $.ajax({
+                    url: `/update-horimetro-atual/${deviceId}/`,
+                    type: 'POST',
+                    data: JSON.stringify({ horimetro_atual: newHorimetroAtual }),
+                    contentType: 'application/json',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $input.data('original-value', newHorimetroAtual);
+                        } else {
+                            alert('Erro ao atualizar horímetro atual: ' + response.message);
+                            $input.val($input.data('original-value'));
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Erro AJAX:', xhr.status, xhr.responseText);
+                        alert('Erro ao atualizar horímetro atual: ' + (xhr.responseJSON?.message || xhr.statusText));
+                        $input.val($input.data('original-value'));
+                    }
+                });
+            }).each(function() {
+                $(this).data('original-value', $(this).val());
+            });
+        });
+    </script>
+</body>
+{% endblock %}

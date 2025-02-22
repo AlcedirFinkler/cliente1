@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'GestaoPrev',
     'gestao_usuarios_admin',
     'relatorios',
+    'monitorESP',
+    'bootstrap4',
 ]
 
 MIDDLEWARE = [

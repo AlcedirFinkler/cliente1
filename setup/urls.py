@@ -30,6 +30,7 @@ urlpatterns = [
     path('',include('CadFornecedor.urls')),
     path('', include('gestao_usuarios_admin.urls')),
     path('', include('relatorios.urls')),
+    path('',include('monitorESP.urls')),
 ]
 
 if settings.DEBUG:
