@@ -1,7 +1,136 @@
-{% extends 'base.html' %}
 {% load static %}
-{% block title %}Finalizar chamado!{% endblock %}
-{% block content %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style> 
+        .sidenav {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #313541;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+        
+        .sidenav a {
+            padding-left: 32px;
+            padding-bottom: 12px;
+            text-decoration: none;
+            font-size: 20px;
+            color: #818181;
+            display: block;
+        }
+        
+        .sidenav h1 {
+            padding-top: 20px;
+            padding-left: 32px;
+            text-decoration: none;
+            font-size: 30px;
+            color: #c4c4c4;
+            display: block;
+        }
+
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
+
+        .sidenav .bottom-links {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            margin-bottom: 35px;
+        }
+
+        .sidenav .bottom-links .logout-link {
+            color: rgb(150, 0, 0);
+        }
+
+        .sidenav .bottom-links .logout-link:hover {
+            color: rgb(255, 0, 0);
+        }
+
+        .sidenav img {
+            display: block;
+            margin: 0 auto 20px auto;
+            width: 80%;
+            height: auto;
+        }
+        
+        main {
+            margin-left: 250px; /* mesmo da sidenav */
+        }
+
+        .header {
+            position: fixed;
+            width: 100%;
+            z-index: 2;
+            top: 0;
+            left: 0;
+            background-color: #fff;
+        }
+
+        
+        .custom-button {
+            background-color: #3C93DA;
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .custom-button:hover {
+            background-color: #28608f;
+        }
+
+        .table-button {
+            padding: 5px 20px;
+            font-size: 14px;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        .top-side {
+            margin-top: 15px;
+            margin-right: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 5vh;
+        }
+
+        .sub-list {
+            padding-left: 20px;
+            display: block;
+        }
+        
+        @media screen and (max-height: 450px) {
+            .sidenav {padding-top: 15px;}
+            .sidenav a {font-size: 18px;}
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Chamados{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" type="text/css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 56px; /* Ajuste conforme a altura da navbar */
+        }
+    </style>
+</head>
+<body>
 <div class="container mt-4">
     <div class="card">
         <div class="card-header">
@@ -51,4 +180,6 @@
         </div>
     </div>
 </div>
-{% endblock %}
+
+</body>
+</html>

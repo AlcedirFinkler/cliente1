@@ -20,6 +20,7 @@ from cadEstoque.models import Pecas, Fornecedor
 from gestaoOS.models import Chamado, Acao, AcaoColaborador
 from GestaoPrev.models import ManutencaoPreventiva, PecasManutencao
 from gestaoUsuarios.models import CadastroPendente
+from django.contrib.auth.decorators import login_required
 
 import os
 
@@ -51,9 +52,11 @@ largura_total_pagina = A4[0]  # Largura total da página em pontos (A4)
 posicao_x_direita = largura_total_pagina - margem_direita  # Posição final da margem direita
 largura_disponivel = largura_total_pagina - margem_direita - margem_esquerda
 
+@login_required
 def relatorios_index(request):
     return render(request, 'relatorios/base_rel.html')
 
+@login_required
 def gerar_excel_indicadores(indicadores):
     """
     Gera um arquivo Excel com os indicadores de manutenção
@@ -119,6 +122,7 @@ def gerar_excel_indicadores(indicadores):
 
     return wb
 
+@login_required
 def gerar_relatorio_pecas(request):
     prazo_dias = int(request.GET.get('prazo', 30))  # Padrão configurado para 30 dias
     
@@ -291,7 +295,7 @@ def gerar_relatorio_pecas(request):
         'valor_total_compra': valor_total_compra
     })
 
-
+@login_required
 def gerar_relatorio_tecnicos(request):
     # Get query parameters
     nome_tecnico = request.GET.get('nome_tecnico', '').strip()
@@ -439,6 +443,7 @@ def gerar_relatorio_tecnicos(request):
     }
     return render(request, 'relatorios/tecnicos.html', context)
 
+@login_required
 def gerar_relatorio_indicadores(request):
     # Obtém o primeiro dia do mês atual
     hoje = timezone.now()
@@ -449,9 +454,9 @@ def gerar_relatorio_indicadores(request):
 
     
     # Debug dos meses sendo analisados
-    print("\nMeses em análise:")
-    for ano, mes in meses_analise:
-        print(f"- {mes}/{ano}")
+    # print("\nMeses em análise:")
+    # for ano, mes in meses_analise:
+        # print(f"- {mes}/{ano}")
     
     # Filtros
     tag = request.GET.get('tag', '').strip()
@@ -468,11 +473,11 @@ def gerar_relatorio_indicadores(request):
     filtros = ", ".join(filter(None, filtros))  # Geração da string de filtros
 
     # Debug dos filtros aplicados
-    print("\nFiltros aplicados:")
-    print(f"TAG: {tag if tag else 'Nenhum'}")
-    print(f"Nome: {nome_equipamento if nome_equipamento else 'Nenhum'}")
-    print(f"Classe: {classe if classe else 'Nenhuma'}")
-    print(f"Setor: {setor if setor else 'Nenhum'}")
+    # print("\nFiltros aplicados:")
+    # print(f"TAG: {tag if tag else 'Nenhum'}")
+    # print(f"Nome: {nome_equipamento if nome_equipamento else 'Nenhum'}")
+    # print(f"Classe: {classe if classe else 'Nenhuma'}")
+    # print(f"Setor: {setor if setor else 'Nenhum'}")
 
     # Obtenção dos equipamentos com base nos filtros
     equipamentos = Equipamento.objects.all()
@@ -493,10 +498,10 @@ def gerar_relatorio_indicadores(request):
 
     # Processamento por equipamento e por mês
     for equipamento in equipamentos:
-        print(f"\nProcessando equipamento: {equipamento.tag} - {equipamento.nome}")
+        # print(f"\nProcessando equipamento: {equipamento.tag} - {equipamento.nome}")
         
         for ano, mes in meses_analise:
-            print(f"\nProcessando mês {mes}/{ano}")
+            # print(f"\nProcessando mês {mes}/{ano}")
             
             primeiro_dia = timezone.datetime(ano, mes, 1)
             ultimo_dia = (primeiro_dia.replace(month=mes % 12 + 1, day=1) - timedelta(days=1)) if mes != 12 else primeiro_dia.replace(year=ano + 1, month=1, day=1) - timedelta(days=1)
@@ -529,9 +534,9 @@ def gerar_relatorio_indicadores(request):
                 tempo_parada_total += float(acoes_tempo)
 
             # Debug dos valores intermediários
-            print(f"Tempo de operação: {tempo_operacao:.2f}h")
-            print(f"Número de chamados corretivos: {chamados_count}")
-            print(f"Tempo total de parada: {tempo_parada_total:.2f}h")
+            # print(f"Tempo de operação: {tempo_operacao:.2f}h")
+            # print(f"Número de chamados corretivos: {chamados_count}")
+            # print(f"Tempo total de parada: {tempo_parada_total:.2f}h")
 
             # Cálculo de MTBF, MTTR e disponibilidade
             if chamados_count > 0:
@@ -544,9 +549,9 @@ def gerar_relatorio_indicadores(request):
             disponibilidade = (mtbf / (mtbf + mttr) * 100) if (mtbf + mttr) > 0 else 100.0
 
             # Debug dos indicadores calculados
-            print(f"MTBF calculado: {mtbf:.2f}h")
-            print(f"MTTR calculado: {mttr:.2f}h")
-            print(f"Disponibilidade calculada: {disponibilidade:.2f}%")
+            # print(f"MTBF calculado: {mtbf:.2f}h")
+            # print(f"MTTR calculado: {mttr:.2f}h")
+            # print(f"Disponibilidade calculada: {disponibilidade:.2f}%")
 
             # Adiciona aos indicadores
             indicadores.append({

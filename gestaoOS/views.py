@@ -148,11 +148,11 @@ def criar_chamado(request):
             chamado = form.save(commit=False)  # Cria o objeto sem salvar no banco ainda
             chamado.usuario = request.user   # Define o usuário logado como dono do chamado
             chamado.save()                   # Salva o objeto no banco de dados
-            print('Chamado salvo com sucesso!')
+            # print('Chamado salvo com sucesso!')
             # messages.success(request, "Chamado cadastrado com sucesso!")
             return redirect('tela_inicial')
         else:
-            print('faltando dados no chamado!')
+            # print('faltando dados no chamado!')
             messages.error(request, "Faltando dados!")
     else:
         form = ChamadoForm(user=request.user)
@@ -263,12 +263,12 @@ def gerenciar_acoes(request, chamado_id):
                                     horas_trabalhadas=float(horas_trab),
                                     descricao_atividade=atividade
                                 )
-                                print(f"Colaborador {colaborador} adicionado com sucesso.")
+                                # print(f"Colaborador {colaborador} adicionado com sucesso.")
                         except (User.DoesNotExist, ValueError) as e:
-                            print(f"Erro ao processar colaborador ID {col_id}: {e}")
+                            # print(f"Erro ao processar colaborador ID {col_id}: {e}")
                             messages.error(request, f"Erro ao processar colaborador: {e}")
-                else:
-                    print("Erro na correspondência dos dados dos colaboradores. Verifique os IDs, horas e atividades.")
+                # else:
+                    # print("Erro na correspondência dos dados dos colaboradores. Verifique os IDs, horas e atividades.")
                             
                 # Processar peças utilizadas
                 pecas_ids = request.POST.getlist('peca[]')[0].split(',') if request.POST.getlist('peca[]') else []
@@ -294,7 +294,7 @@ def gerenciar_acoes(request, chamado_id):
                 return redirect('gerenciar_acoes', chamado_id=chamado.id)
         else:
             form = AcaoForm()
-            print("Formulário inválido")
+            # print("Formulário inválido")
 
         context = {
             'form': form,
@@ -369,9 +369,10 @@ def gerenciar_acoes(request, chamado_id):
         ).order_by('username')
 
         # Print the technicians' workload information
-        print("Informação dos Técnicos Aprovados:")
-        for tecnico in tecnicos_workload:
-            print(f"Técnico: {tecnico.username}, Chamados em Andamento: {tecnico.chamados_em_andamento}")
+        
+        # print("Informação dos Técnicos Aprovados:")
+        # for tecnico in tecnicos_workload:
+            # print(f"Técnico: {tecnico.username}, Chamados em Andamento: {tecnico.chamados_em_andamento}")
 
 
 
@@ -384,7 +385,7 @@ def gerenciar_acoes(request, chamado_id):
                 return redirect('tela_inicial')  # or redirect to wherever you want after edit
         else:
             form = FinalizarChamadoGestorForm(request.POST, instance=chamado, user=request.user)
-            print("Formulário inválido")
+            # print("Formulário inválido")
 
         context = {
             'form': form,

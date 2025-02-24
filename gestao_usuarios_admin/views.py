@@ -74,7 +74,7 @@ def editar_usuario_pendente(request, pk):
 @user_passes_test(is_gestor)
 def criar_usuario(request):
     if request.method == 'POST':
-        print("hello1")
+        # print("hello1")
         form = NovoUsuarioForm(request.POST)
         if form.is_valid():
             try:

@@ -7,11 +7,12 @@ from django.db.models import Q
 import logging
 logger = logging.getLogger(__name__)
 
+@login_required
 def teste(request):
     pecas = Pecas.objects.all()
     fornecedor_id = request.POST.get('fornecedor')
-    print("Request POST:", request.POST)  # Debug do formulário enviado
-    print("Fornecedor ID recebido:", fornecedor_id)  # Debug do fornecedor
+    # print("Request POST:", request.POST)  # Debug do formulário enviado
+    # print("Fornecedor ID recebido:", fornecedor_id)  # Debug do fornecedor
 
     # Recupera os filtros da requisição GET
     descricao = request.GET.get('descricao')
@@ -50,8 +51,8 @@ def cria_peca(request):
         logger.debug(f"Dados recebidos no POST: {request.POST}")
         form = PecasForm(request.POST, request.FILES)
         fornecedor_id = request.POST.get('fornecedor')
-        print("Request POST:", request.POST)  # Debug do formulário enviado
-        print("Fornecedor ID recebido:", fornecedor_id)  # Debug do fornecedor
+        # print("Request POST:", request.POST)  # Debug do formulário enviado
+        # print("Fornecedor ID recebido:", fornecedor_id)  # Debug do fornecedor
         if form.is_valid():
             # Verifica fornecedor
             peca = form.save(commit=False)
@@ -63,7 +64,7 @@ def cria_peca(request):
 
             logger.debug("Formulário validado com sucesso.")
             fornecedor_id = request.POST.get('fornecedor')
-            print("Fornecedor ID antes de salvar:", fornecedor_id)
+            # print("Fornecedor ID antes de salvar:", fornecedor_id)
             peca = form.save()
             logger.debug(f"Peça criada: {peca}")
             return redirect('cadEstoque')
@@ -81,14 +82,14 @@ def editar_peca(request, id):
     peca = get_object_or_404(Pecas, id=id)
     fornecedor_selecionado = peca.fornecedor  # Obtem o fornecedor diretamente, se existir
     # Adicionando prints para debug
-    print("\n=== DEBUG INFORMAÇÕES DE FORNECEDORES ===")
-    print(f"Fornecedor selecionado: {fornecedor_selecionado}")
-    if fornecedor_selecionado:
-        print(f"Detalhes do fornecedor selecionado:")
-        print(f"- ID: {fornecedor_selecionado.id}")
-        print(f"- Nome: {fornecedor_selecionado.fornecedor}")
-        print(f"- Email: {fornecedor_selecionado.fornecedor_email}")
-        print(f"- Telefone: {fornecedor_selecionado.fornecedor_fone}")
+    # print("\n=== DEBUG INFORMAÇÕES DE FORNECEDORES ===")
+    # print(f"Fornecedor selecionado: {fornecedor_selecionado}")
+    # if fornecedor_selecionado:
+        # print(f"Detalhes do fornecedor selecionado:")
+        # print(f"- ID: {fornecedor_selecionado.id}")
+        # print(f"- Nome: {fornecedor_selecionado.fornecedor}")
+        # print(f"- Email: {fornecedor_selecionado.fornecedor_email}")
+        # print(f"- Telefone: {fornecedor_selecionado.fornecedor_fone}")
     if request.method == 'POST':
         form = PecasForm(request.POST, request.FILES, instance=peca)
         fornecedor_id = request.POST.get('fornecedor')
@@ -117,6 +118,7 @@ def excluir_peca(request, id):
         return redirect('cadEstoque')
     return render(request, 'confirmar_exclusao.html', {'peca': peca})
 
+@login_required
 def busca_fornecedores(request):
     nome_parcial = request.GET.get('nome', '')
     fornecedores = Fornecedor.objects.filter(

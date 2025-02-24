@@ -100,7 +100,7 @@ def login_view(request):
                     
                         
             except CadastroPendente.DoesNotExist:
-                print('Usuário não cadastrado')
+                # print('Usuário não cadastrado')
                 messages.error(request, "Usuário não cadastrado.")
                 return redirect('login')
                

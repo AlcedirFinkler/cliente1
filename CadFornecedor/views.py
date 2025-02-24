@@ -4,6 +4,7 @@ from .forms import FornecedorForm
 from .models import Fornecedor
 from django.contrib import messages
 
+@login_required
 def CadFornecedor(request):
     fornecedores = Fornecedor.objects.all()
     
@@ -35,7 +36,7 @@ def cria_fornecedor(request):
             fornecedor.save()
             return redirect('CadFornecedor')
     else:
-        print('Faltando dados:')
+        # print('Faltando dados:')
         form = FornecedorForm()
 
     return render(request, 'cria_fornecedor.html', {'form': form})

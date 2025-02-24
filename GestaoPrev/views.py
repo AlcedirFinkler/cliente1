@@ -12,6 +12,7 @@ import calendar
 import json
 from gestaoOS.models import Chamado, Setor
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
 
 def get_month_calendar(year, month):
@@ -24,6 +25,7 @@ def get_month_calendar(year, month):
         'month': month
     }
 
+@login_required
 def editar_manutencao(request, id):
     manutencao = get_object_or_404(ManutencaoPreventiva, id=id)
     
@@ -75,6 +77,7 @@ def editar_manutencao(request, id):
         'pecas_selecionadas': pecas_detalhadas,
     })
 
+@login_required
 def excluir_manutencao(request, id):
     manutencao = get_object_or_404(ManutencaoPreventiva, id=id)
 
@@ -84,44 +87,44 @@ def excluir_manutencao(request, id):
 
     return render(request, 'excluir_manutencao.html', {'manutencao': manutencao})
 
-
+@login_required
 def criar_manutencao(request):
     if request.method == 'POST':
         form = ManutencaoPreventivaForm(request.POST, request.FILES)
         pecas_quantidade_str = request.POST.get('pecas_quantidade', '')
         
         # Imprimir dados do formulário enviados pelo POST
-        print("Dados recebidos do formulário:")
-        print(request.POST)
+        # print("Dados recebidos do formulário:")
+        # print(request.POST)
 
         if form.is_valid():
             manutencao = form.save(commit=False)
             manutencao.status = 'programada'
 
             # Exibir informações do formulário após validação
-            print("Equipamento selecionado:", form.cleaned_data['equipamento'])
-            print("Peças selecionadas:", form.cleaned_data['pecas'])
-            print("Outros campos:")
-            print({
-                'descricao': form.cleaned_data['descricao'],
-                'tipo_calculo': form.cleaned_data['tipo_calculo'],
-                'requer_parada': form.cleaned_data['requer_parada'],
-                'data_ultima_manutencao': form.cleaned_data['data_ultima_manutencao'],
-                'horimetro_atual': form.cleaned_data['horimetro_atual'],
-                'periodo_meses': form.cleaned_data['periodo_meses'],
-                'horas_intervalo': form.cleaned_data['horas_intervalo'],
-            })
+            # print("Equipamento selecionado:", form.cleaned_data['equipamento'])
+            # print("Peças selecionadas:", form.cleaned_data['pecas'])
+            # print("Outros campos:")
+            # print({
+            #     'descricao': form.cleaned_data['descricao'],
+            #     'tipo_calculo': form.cleaned_data['tipo_calculo'],
+            #     'requer_parada': form.cleaned_data['requer_parada'],
+            #     'data_ultima_manutencao': form.cleaned_data['data_ultima_manutencao'],
+            #     'horimetro_atual': form.cleaned_data['horimetro_atual'],
+            #     'periodo_meses': form.cleaned_data['periodo_meses'],
+            #     'horas_intervalo': form.cleaned_data['horas_intervalo'],
+            # })
 
             # Validações específicas baseadas no tipo de cálculo
             tipo_calculo = form.cleaned_data['tipo_calculo']
             if tipo_calculo in ['horas', 'ambos'] and not form.cleaned_data['horas_intervalo']:
                 messages.error(request, 'Para cálculo por horas, o intervalo de horas é obrigatório.')
-                print('Para cálculo por horas, o intervalo de horas é obrigatório.')
+                # print('Para cálculo por horas, o intervalo de horas é obrigatório.')
                 return render(request, 'criar_manutencao.html', {'form': form})
 
             if tipo_calculo in ['meses', 'ambos'] and not form.cleaned_data['periodo_meses']:
                 messages.error(request, 'Para cálculo por meses, o período em meses é obrigatório.')
-                print('Para cálculo por meses, o período em meses é obrigatório.')
+                # print('Para cálculo por meses, o período em meses é obrigatório.')
                 return render(request, 'criar_manutencao.html', {'form': form})
 
             # Salvar a manutenção
@@ -141,13 +144,13 @@ def criar_manutencao(request):
                         print(f"Erro ao processar item: {item}")
 
             # Exibir debug após salvar a manutenção
-            print("Manutenção salva com sucesso:")
-            print(manutencao)
+            # print("Manutenção salva com sucesso:")
+            # print(manutencao)
 
             # Salvando as peças relacionadas
             if form.cleaned_data['pecas']:
                 manutencao.pecas.set(form.cleaned_data['pecas'])
-                print("Peças relacionadas salvas:", form.cleaned_data['pecas'])
+                # print("Peças relacionadas salvas:", form.cleaned_data['pecas'])
 
             messages.success(request, 'Manutenção preventiva criada com sucesso!')
             return redirect('listar_manutencoes')
@@ -178,7 +181,7 @@ def criar_manutencao(request):
         'pecas': pecas,
     })
 
-
+@login_required
 def listar_manutencoes(request):
     # Atualiza o status de todas as manutenções
     ManutencaoPreventiva.atualizar_todos_status()
@@ -225,13 +228,13 @@ def listar_manutencoes(request):
     manutencoes = manutencoes.order_by('data_proxima_manutencao')
 
     # Imprime os filtros aplicados
-    print("Filtros aplicados:")
-    print(f"Nome Equipamento: {nome_equipamento}")
-    print(f"Tag Equipamento: {tag_equipamento}")
-    print(f"Classe Equipamento: {classe_equipamento}")
-    print(f"Status: {status_manutencao}")
-    print(f"Setor: {setor}")
-    print(f"Data: {data_filter}")
+    # print("Filtros aplicados:")
+    # print(f"Nome Equipamento: {nome_equipamento}")
+    # print(f"Tag Equipamento: {tag_equipamento}")
+    # print(f"Classe Equipamento: {classe_equipamento}")
+    # print(f"Status: {status_manutencao}")
+    # print(f"Setor: {setor}")
+    # print(f"Data: {data_filter}")
 
     # Prepara dados para os filtros dropdown
     equipamentos = Equipamento.objects.all()
@@ -262,7 +265,7 @@ def listar_manutencoes(request):
         
         calendars.append(get_month_calendar(year, month))
 
-    print(setores)
+    # print(setores)
 
     context = {
         'manutencoes': manutencoes,
@@ -286,6 +289,7 @@ def listar_manutencoes(request):
     
     return render(request, 'listar_manutencoes.html', context)
 
+@login_required
 def gerar_os_preventiva(request, manutencao_id):
     manutencao = get_object_or_404(ManutencaoPreventiva, id=manutencao_id)
 
@@ -296,10 +300,10 @@ def gerar_os_preventiva(request, manutencao_id):
     ).order_by('username')
 
     # Debug print
-    print("\nDados dos técnicos sendo enviados ao template:")
-    for tecnico in tecnicos_workload:
-        print(f"ID: {tecnico.id}, Username: {tecnico.username}, "
-              f"Chamados em andamento: {tecnico.chamados_em_andamento}")
+    # print("\nDados dos técnicos sendo enviados ao template:")
+    # for tecnico in tecnicos_workload:
+        #print(f"ID: {tecnico.id}, Username: {tecnico.username}, "
+              # f"Chamados em andamento: {tecnico.chamados_em_andamento}")
     
     if request.method == "POST":
         tecnico_id = request.POST.get('tecnico')
