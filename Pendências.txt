@@ -6,6 +6,9 @@ OBS 1: Quando logar como "Solicitante" ou "Técnico", não pode aparecer os arqu
   Modifiquei para que as outras telas que são acessadas por Solicitante ou Técnico como, as telas de abertura e fechamento de chamados não utilizem o base. (criar_chamado.html, finalizar_chamado.html, gerenciar_acoes.html, tela_solicitante.html, tela_tecnico.html, historico_equipamento.html.)
 OBS 2: Revisei para que em todas as funções das views tenha a solicitação de @login_required
 OBS 3: Removi todas os print do código que haviam sido implementados para Debug. 
+OBS 4: Corrigi para que, ao logar com Estoquista, apenas os campos liberados para ele sejam exibidos. 
+
+Observações a corrigir: Em "adicionar peças" e "adicionar colaboradores" na janela do técnico não está funcionando o filtro para buscar por parte do nome da peça. Precisa ser corrigido. 
 
 Na app de gestão de usuários: 
 1 - Configurar modificação de senha.  
@@ -27,6 +30,9 @@ Na app Relatórios:
   1.1 - Nos campos valores, mostrar o símbolo "R$" 
   1.2 - Incluir nos campos a exibição do fornecedor. 
   1.3 - Incluir a geração desse relatório para Excell. 
+
+Reiniciar as migrações e banco de dados. Partir de um projeto "zerado" e testar o sistema passo a passo. 
+Fazer um deploy e testar com o sistema publicado. Fazer vídeos com as instruções de uso! 
 
 
 ###################################################################################

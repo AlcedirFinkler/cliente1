@@ -56,7 +56,6 @@ largura_disponivel = largura_total_pagina - margem_direita - margem_esquerda
 def relatorios_index(request):
     return render(request, 'relatorios/base_rel.html')
 
-@login_required
 def gerar_excel_indicadores(indicadores):
     """
     Gera um arquivo Excel com os indicadores de manutenção

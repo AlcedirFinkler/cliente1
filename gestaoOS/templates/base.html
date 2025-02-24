@@ -147,28 +147,31 @@
         </div>
         <div class="offcanvas-body">
             <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="{% url 'selecao_modulos' %}">Tela Inicial</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'tela_inicial' %}">Gestão OS</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'listar_manutencoes' %}">Mant. Preventivas</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'cadEstoque' %}">Estoque</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'CadEquip' %}">Equipamentos</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'CadFornecedor' %}">Fornecedores</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'listar_usuarios_pendentes' %}">Usuários</a></li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Relatórios
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark">
-                      <li><a class="dropdown-item" href="{% url 'relatorio_pecas' %}">Peças</a></li>
-                      <li><a class="dropdown-item" href="{% url 'relatorio_tecnicos' %}">Técnicos</a></li>
-                      <li><a class="dropdown-item" href="{% url 'relatorio_indicadores' %}">Indicadores</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'device_list' %}"> Horimetros:</a></li> 
-                <li class="nav-item"><a href="{% url 'login' %}" class="btn btn-danger">Sair</a></li>
+                {% for module in modules %}
+                    {% if module.enabled %}
+                        {% if module.submenu %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="{{ module.icon }}"></i> {{ module.name }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    {% for submenu_item in module.submenu %}
+                                        <li><a class="dropdown-item" href="{{ submenu_item.url }}">{{ submenu_item.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ module.url }}">
+                                    <i class="{{ module.icon }}"></i> {{ module.name }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <li class="nav-item"><a href="{% url 'login' %}" class="btn btn-danger mt-3"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
             </ul>
         </div>
-    
     </div>
 </nav>
     <main class="container mt-5 pt-4">
@@ -181,6 +184,57 @@
 
     <!-- Bootstrap JS e Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    let offcanvas = document.getElementById('offcanvasNavbar');
+    offcanvas.addEventListener('show.bs.offcanvas', function () {
+        fetch("{% url 'api_modules' %}")
+            .then(response => response.json())
+            .then(data => {
+                let menuContainer = document.querySelector('.offcanvas-body ul.navbar-nav');
+                if (menuContainer) {
+                    // Limpa o conteúdo atual
+                    menuContainer.innerHTML = '';
+                    
+                    // Cria os itens de menu com base nos módulos atualizados
+                    data.modules.forEach(function(module) {
+                        if (module.enabled) {
+                            let li = document.createElement('li');
+                            li.className = 'nav-item';
+                            
+                            // Verifica se o módulo tem submenu
+                            if (module.submenu) {
+                                li.classList.add('dropdown');
+                                li.innerHTML = `
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="${module.icon}"></i> ${module.name}
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-dark">
+                                        ${module.submenu.map(sub => `<li><a class="dropdown-item" href="${sub.url}">${sub.name}</a></li>`).join('')}
+                                    </ul>
+                                `;
+                            } else {
+                                li.innerHTML = `
+                                    <a class="nav-link" href="${module.url}">
+                                        <i class="${module.icon}"></i> ${module.name}
+                                    </a>
+                                `;
+                            }
+                            menuContainer.appendChild(li);
+                        }
+                    });
 
+                    // Reinserir o item "Sair"
+                    let liLogout = document.createElement('li');
+                    liLogout.className = 'nav-item';
+                    liLogout.innerHTML = `<a href="{% url 'login' %}" class="btn btn-danger mt-3"><i class="bi bi-box-arrow-right"></i> Sair</a>`;
+                    menuContainer.appendChild(liLogout);
+                }
+            })
+            .catch(error => console.error('Erro ao carregar módulos:', error));
+    });
+});
+
+    </script>
 </body>
 </html>
