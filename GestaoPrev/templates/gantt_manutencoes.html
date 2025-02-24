@@ -1,0 +1,664 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load filters %}
+{% block title %}GESTOR - Gantt de Manutenções{% endblock %}
+
+{% block content %}
+<style>
+    .gantt-container {
+        overflow-x: auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .gantt-controls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .zoom-btn {
+        padding: 5px 10px;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .zoom-btn:hover {
+        background: #e0e0e0;
+    }
+
+    .zoom-btn.active {
+        background: #2196F3;
+        color: white;
+        border-color: #1976D2;
+    }
+
+    .filter-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .filter-controls select {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .timeline-container {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: white;
+        overflow: hidden;
+    }
+
+    .timeline-header {
+        display: flex;
+        margin-left: 300px;
+        height: 80px;
+        background: #f5f5f5;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .timeline-week, .timeline-month, .timeline-quarter, .timeline-year {
+        text-align: center;
+        padding: 5px;
+        font-size: 0.9em;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-right: 1px solid #ddd;
+        flex: 0 0 auto;
+    }
+
+    .timeline-header-week, .timeline-header-month, 
+    .timeline-header-quarter, .timeline-header-year {
+        display: none;
+    }
+
+    .timeline-header-week.active, .timeline-header-month.active, 
+    .timeline-header-quarter.active, .timeline-header-year.active {
+        display: flex;
+    }
+
+    .timeline-week .month, .timeline-month .month, 
+    .timeline-quarter .quarter, .timeline-year .year {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .timeline-week .week {
+        color: #666;
+    }
+
+    .rows-container {
+        position: relative;
+    }
+
+    .gantt-row {
+        display: flex;
+        height: 40px;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        transition: background-color 0.2s;
+    }
+
+    .gantt-row:hover {
+        background-color: #f9f9f9;
+    }
+
+    .row-label {
+        position: sticky;
+        left: 0;
+        width: 300px;
+        background: white;
+        z-index: 2;
+        padding: 10px;
+        border-right: 2px solid #ddd;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .setor-label {
+        background-color: #e3f2fd;
+        font-weight: bold;
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .setor-label .toggle-icon {
+        margin-right: 8px;
+        transition: transform 0.3s;
+    }
+
+    .setor-label.collapsed .toggle-icon {
+        transform: rotate(-90deg);
+    }
+
+    .setor-group.collapsed .gantt-row:not(.setor-label) {
+        display: none;
+    }
+
+    .bars-container {
+        flex: 1;
+        position: relative;
+        min-width: 1000px;
+    }
+
+    .today-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #FF5722;
+        z-index: 1;
+    }
+
+    .gantt-bar {
+        position: absolute;
+        height: 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+        color: white;
+        font-size: 0.8em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        border: 1px solid rgba(0,0,0,0.1);
+        top: 8px;
+    }
+
+    .gantt-bar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        z-index: 4 !important;
+    }
+
+    .gantt-bar.programada {
+        background-color: #4CAF50;
+    }
+
+    .gantt-bar.atrasada {
+        background-color: #F44336;
+    }
+
+    .gantt-bar.em_execucao {
+        background-color: #2196F3;
+    }
+
+    .gantt-tooltip {
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 5;
+        display: none;
+        min-width: 200px;
+        max-width: 300px;
+    }
+
+    .legend {
+        margin: 20px 0;
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 4px;
+        background: #f5f5f5;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+        .row-label {
+            width: 200px;
+        }
+        
+        .timeline-header {
+            margin-left: 200px;
+        }
+        
+        .gantt-controls {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Gantt de Manutenções Preventivas</h2>
+            <p class="text-muted">Visualização dos agendamentos de manutenções por setor e equipamento</p>
+        </div>
+    </div>
+
+    <div class="gantt-container">
+        <div class="gantt-controls">
+            <div class="zoom-controls">
+                <span>Visualizar:</span>
+                <button class="zoom-btn" data-scale="week">Semana</button>
+                <button class="zoom-btn active" data-scale="month">Mês</button>
+                <button class="zoom-btn" data-scale="quarter">Trimestre</button>
+                <button class="zoom-btn" data-scale="year">Ano</button>
+            </div>
+            
+            <div class="filter-controls">
+                <span>Filtrar por:</span>
+                <select id="filter-setor">
+                    <option value="">Todos os Setores</option>
+                    {% for setor, dados in estrutura.items %}
+                    <option value="{{ setor }}">{{ setor }}</option>
+                    {% endfor %}
+                </select>
+                
+                <select id="filter-status">
+                    <option value="">Todos os Status</option>
+                    <option value="programada">Programada</option>
+                    <option value="em_execucao">Em Execução</option>
+                    <option value="atrasada">Atrasada</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Legenda -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4CAF50;"></div>
+                <span>Programada</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #F44336;"></div>
+                <span>Atrasada</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #2196F3;"></div>
+                <span>Em Execução</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: transparent; border: 2px solid #FF5722;"></div>
+                <span>Hoje</span>
+            </div>
+        </div>
+
+        <!-- Timeline Headers com diferentes escalas -->
+        <div class="timeline-container">
+            <!-- Header para visualização semanal -->
+            <div class="timeline-header timeline-header-week" data-scale="week">
+                <!-- Será preenchido via JavaScript -->
+            </div>
+            
+            <!-- Header para visualização mensal -->
+            <div class="timeline-header timeline-header-month active" data-scale="month">
+                {% for week in timeline %}
+                <div class="timeline-month" style="width: 100px;">
+                    <div class="month">{{ week.month }}</div>
+                    <div class="week">S{{ week.week_number }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Header para visualização trimestral -->
+            <div class="timeline-header timeline-header-quarter" data-scale="quarter">
+                <!-- Será preenchido via JavaScript -->
+            </div>
+            
+            <!-- Header para visualização anual -->
+            <div class="timeline-header timeline-header-year" data-scale="year">
+                <!-- Será preenchido via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="rows-container">
+            {% for setor, dados_setor in estrutura.items %}
+            <div class="setor-group" data-setor="{{ setor }}">
+                <div class="gantt-row setor-label">
+                    <div class="row-label">
+                        <span class="toggle-icon">▼</span>
+                        {{ setor }}
+                    </div>
+                    <div class="bars-container"></div>
+                </div>
+                
+                {% for equipamento, manutencoes in dados_setor.equipamentos.items %}
+                <div class="gantt-row">
+                    <div class="row-label">{{ equipamento }}</div>
+                    <div class="bars-container">
+                        {% for manutencao in manutencoes %}
+                        <a href="{% url 'gerar_os_preventiva' manutencao.id %}" 
+                           class="gantt-bar {{ manutencao.status }}"
+                           data-start="{{ manutencao.data_proxima_manutencao|date:'Y-m-d' }}"
+                           data-duration="{{ manutencao.duracao_estimada|default:1 }}"
+                           data-id="{{ manutencao.id }}"
+                           data-descricao="{{ manutencao.descricao }}"
+                           data-equip="{{ manutencao.equipamento.nome }}"
+                           data-status="{{ manutencao.status }}"
+                           data-data="{{ manutencao.data_proxima_manutencao|date:'d/m/Y' }}">
+                            {{ manutencao.descricao|truncatechars:20 }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            
+            <!-- Tooltip -->
+            <div class="gantt-tooltip" id="gantt-tooltip">
+                <h5 id="tooltip-title"></h5>
+                <div id="tooltip-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const bars = document.querySelectorAll('.gantt-bar');
+        const minDate = new Date('{{ min_date|date:"Y-m-d" }}');
+        const maxDate = new Date('{{ max_date|date:"Y-m-d" }}');
+        const totalDuration = maxDate - minDate;
+        const containerWidth = document.querySelector('.bars-container').offsetWidth;
+        const today = new Date();
+        
+        // Gerar cabeçalhos para diferentes escalas
+        generateTimelineHeaders(minDate, maxDate);
+        
+        // Posicionar a linha de "hoje"
+        if (today >= minDate && today <= maxDate) {
+            const daysFromStart = Math.floor((today - minDate) / (1000 * 3600 * 24));
+            const leftPercent = (daysFromStart / {{ total_days }}) * 100;
+            
+            const barsContainers = document.querySelectorAll('.bars-container');
+            barsContainers.forEach(container => {
+                const todayLine = document.createElement('div');
+                todayLine.className = 'today-line';
+                todayLine.style.left = `${leftPercent}%`;
+                container.appendChild(todayLine);
+            });
+        }
+
+        // Posicionar as barras no Gantt
+        bars.forEach(bar => {
+            const startDate = new Date(bar.dataset.start);
+            const durationDays = parseFloat(bar.dataset.duration) || 1;
+            
+            // Calcular posição left
+            const daysFromStart = Math.floor((startDate - minDate) / (1000 * 3600 * 24));
+            const leftPercent = (daysFromStart / {{ total_days }}) * 100;
+            
+            // Calcular largura com base na duração
+            const widthPercent = (durationDays / {{ total_days }}) * 100;
+            
+            bar.style.left = `${leftPercent}%`;
+            bar.style.width = `${Math.max(widthPercent, 3)}%`; // Mínimo de 3% para visibilidade
+            
+            // Adicionar evento de hover para tooltip
+            bar.addEventListener('mouseover', function(e) {
+                const tooltip = document.getElementById('gantt-tooltip');
+                tooltip.querySelector('#tooltip-title').textContent = this.dataset.descricao;
+                
+                let content = `
+                    <p><strong>Equipamento:</strong> ${this.dataset.equip}</p>
+                    <p><strong>Status:</strong> ${this.dataset.status}</p>
+                    <p><strong>Data Prevista:</strong> ${this.dataset.data}</p>
+                    <p><strong>Duração Estimada:</strong> ${this.dataset.duration} dia(s)</p>
+                `;
+                
+                tooltip.querySelector('#tooltip-content').innerHTML = content;
+                
+                // Posicionar tooltip
+                tooltip.style.display = 'block';
+                tooltip.style.left = `${e.pageX + 10}px`;
+                tooltip.style.top = `${e.pageY + 10}px`;
+            });
+            
+            bar.addEventListener('mouseout', function() {
+                document.getElementById('gantt-tooltip').style.display = 'none';
+            });
+        });
+        
+        // Toggle para expandir/colapsar setores
+        document.querySelectorAll('.setor-label').forEach(label => {
+            label.addEventListener('click', function() {
+                const group = this.closest('.setor-group');
+                group.classList.toggle('collapsed');
+                this.classList.toggle('collapsed');
+            });
+        });
+        
+        // Filtro por setor
+        document.getElementById('filter-setor').addEventListener('change', function() {
+            const selectedSetor = this.value;
+            const setorGroups = document.querySelectorAll('.setor-group');
+            
+            setorGroups.forEach(group => {
+                if (!selectedSetor || group.dataset.setor === selectedSetor) {
+                    group.style.display = '';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+        });
+        
+        // Filtro por status
+        document.getElementById('filter-status').addEventListener('change', function() {
+            const selectedStatus = this.value;
+            
+            bars.forEach(bar => {
+                if (!selectedStatus || bar.dataset.status === selectedStatus) {
+                    bar.style.display = '';
+                } else {
+                    bar.style.display = 'none';
+                }
+            });
+        });
+        
+        // Controle de zoom
+        document.querySelectorAll('.zoom-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remover classe active de todos os botões
+                document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+                // Adicionar classe active ao botão clicado
+                this.classList.add('active');
+                
+                const scale = this.dataset.scale;
+                let dayWidth;
+                
+                switch(scale) {
+                    case 'week':
+                        dayWidth = 20; // 20px por dia
+                        break;
+                    case 'month':
+                        dayWidth = 5; // 5px por dia
+                        break;
+                    case 'quarter':
+                        dayWidth = 2; // 2px por dia
+                        break;
+                    case 'year':
+                        dayWidth = 1; // 1px por dia
+                        break;
+                    default:
+                        dayWidth = 5;
+                }
+                
+                // Alternar visibilidade do cabeçalho correspondente
+                document.querySelectorAll('.timeline-header').forEach(header => {
+                    header.classList.remove('active');
+                });
+                document.querySelector(`.timeline-header-${scale}`).classList.add('active');
+                
+                // Calcular nova largura para as barras
+                const barsContainers = document.querySelectorAll('.bars-container');
+                const newWidth = {{ total_days }} * dayWidth;
+                
+                barsContainers.forEach(container => {
+                    container.style.minWidth = `${newWidth}px`;
+                });
+                
+                // Recalcular posições das barras
+                bars.forEach(bar => {
+                    const startDate = new Date(bar.dataset.start);
+                    const durationDays = parseFloat(bar.dataset.duration) || 1;
+                    
+                    const daysFromStart = Math.floor((startDate - minDate) / (1000 * 3600 * 24));
+                    const leftPosition = daysFromStart * dayWidth;
+                    const widthValue = durationDays * dayWidth;
+                    
+                    bar.style.left = `${leftPosition}px`;
+                    bar.style.width = `${Math.max(widthValue, 20)}px`; // Mínimo de 20px
+                });
+                
+                // Reposicionar linha de hoje
+                const todayLines = document.querySelectorAll('.today-line');
+                if (today >= minDate && today <= maxDate) {
+                    const daysFromStart = Math.floor((today - minDate) / (1000 * 3600 * 24));
+                    const leftPosition = daysFromStart * dayWidth;
+                    
+                    todayLines.forEach(line => {
+                        line.style.left = `${leftPosition}px`;
+                    });
+                }
+            });
+        });
+        
+        // Função para gerar os cabeçalhos de timeline para diferentes escalas
+        function generateTimelineHeaders(minDate, maxDate) {
+            // Para visualização semanal
+            generateWeeklyHeader(minDate, maxDate);
+            
+            // Para visualização trimestral
+            generateQuarterlyHeader(minDate, maxDate);
+            
+            // Para visualização anual
+            generateYearlyHeader(minDate, maxDate);
+        }
+        
+        function generateWeeklyHeader(minDate, maxDate) {
+            const weekHeader = document.querySelector('.timeline-header-week');
+            weekHeader.innerHTML = '';
+            
+            let currentDate = new Date(minDate);
+            
+            while (currentDate <= maxDate) {
+                const weekEl = document.createElement('div');
+                weekEl.className = 'timeline-week';
+                weekEl.style.width = '140px'; // 20px por dia * 7 dias
+                
+                const dayOfWeek = currentDate.toLocaleDateString('pt-BR', { weekday: 'short' });
+                const day = currentDate.getDate();
+                const month = currentDate.toLocaleDateString('pt-BR', { month: 'short' });
+                
+                weekEl.innerHTML = `
+                    <div class="month">${month}</div>
+                    <div class="week">${dayOfWeek} ${day}</div>
+                `;
+                
+                weekHeader.appendChild(weekEl);
+                
+                // Avançar para o próximo dia
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        
+        function generateQuarterlyHeader(minDate, maxDate) {
+            const quarterHeader = document.querySelector('.timeline-header-quarter');
+            quarterHeader.innerHTML = '';
+            
+            let currentDate = new Date(minDate);
+            
+            // Arredondar para o início do mês
+            currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            
+            while (currentDate <= maxDate) {
+                const month = currentDate.getMonth();
+                const year = currentDate.getFullYear();
+                const quarter = Math.floor(month / 3) + 1;
+                
+                const quarterEl = document.createElement('div');
+                quarterEl.className = 'timeline-quarter';
+                
+                // Um mês ocupa aproximadamente 30 dias * 2px = 60px
+                quarterEl.style.width = '180px'; // 3 meses aproximadamente 60px * 3
+                
+                quarterEl.innerHTML = `
+                    <div class="quarter">Q${quarter}</div>
+                    <div class="year">${year}</div>
+                `;
+                
+                quarterHeader.appendChild(quarterEl);
+                
+                // Avançar para o próximo trimestre
+                currentDate.setMonth(currentDate.getMonth() + 3);
+            }
+        }
+        
+        function generateYearlyHeader(minDate, maxDate) {
+            const yearHeader = document.querySelector('.timeline-header-year');
+            yearHeader.innerHTML = '';
+            
+            let currentDate = new Date(minDate);
+            
+            // Arredondar para o início do ano
+            currentDate = new Date(currentDate.getFullYear(), 0, 1);
+            
+            while (currentDate <= maxDate) {
+                const year = currentDate.getFullYear();
+                
+                const yearEl = document.createElement('div');
+                yearEl.className = 'timeline-year';
+                
+                // Um ano ocupa aproximadamente 365 dias * 1px = 365px
+                yearEl.style.width = '365px'; 
+                
+                yearEl.innerHTML = `
+                    <div class="year">${year}</div>
+                `;
+                
+                yearHeader.appendChild(yearEl);
+                
+                // Avançar para o próximo ano
+                currentDate.setFullYear(currentDate.getFullYear() + 1);
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -19,8 +19,8 @@ def cria_equipamento(request):
     if request.method == "POST":
         form = EquipamentoForm(request.POST, request.FILES)
         fornecedor_id = request.POST.get('fornecedor')
-        # print("Request POST:", request.POST)  # Debug do formulário enviado
-        # print("Fornecedor ID recebido:", fornecedor_id)  # Debug do fornecedor
+        print("Request POST:", request.POST)  # Debug do formulário enviado
+        print("Fornecedor ID recebido:", fornecedor_id)  # Debug do fornecedor
 
 
         
@@ -58,20 +58,20 @@ def cria_equipamento(request):
             # Se não houver erros, salva o equipamento
             if not form.errors:
                 fornecedor_id = request.POST.get('fornecedor')
-                # print("Fornecedor ID antes de salvar:", fornecedor_id)
+                print("Fornecedor ID antes de salvar:", fornecedor_id)
                 if fornecedor_id:
                     equipamento.fornecedor_id = fornecedor_id
                 equipamento.save()
-                # print("Equipamento:", equipamento)
-                # print("Fornecedor:", equipamento.fornecedor)
-                # print('Equipamento salvo com sucesso!')
+                print("Equipamento:", equipamento)
+                print("Fornecedor:", equipamento.fornecedor)
+                print('Equipamento salvo com sucesso!')
                 return redirect('CadEquip')
             else:
                 messages.error(request, 'Erro ao cadastrar equipamento. Corrija os campos destacados.')
 
         else:
             messages.error(request, 'Erro ao processar o formulário. Verifique os dados informados.')
-            # print("Erros do formulário:", form.errors)  # Debug para desenvolvimento
+            print("Erros do formulário:", form.errors)  # Debug para desenvolvimento
 
     else:
         form = EquipamentoForm()
@@ -127,19 +127,19 @@ def listar_equipamentos(request):
 
 @login_required
 def editar_equipamento(request, id):
-    # print('Acessou a tela de edição de equipamento!')
+    print('Acessou a tela de edição de equipamento!')
     equipamento = get_object_or_404(Equipamento, id=id)
     fornecedor_selecionado = equipamento.fornecedor  # Obtem o fornecedor diretamente, se existir
     # Adicionando prints para debug
-    # print("\n=== DEBUG INFORMAÇÕES DO EQUIPAMENTO E FORNECEDORES ===")
-    # print(f"Equipamento ID: {equipamento.id}")
-    # print(f"Fornecedor selecionado: {fornecedor_selecionado}")
-    # if fornecedor_selecionado:
-        # print(f"Detalhes do fornecedor selecionado:")
-        # print(f"- ID: {fornecedor_selecionado.id}")
-        # print(f"- Nome: {fornecedor_selecionado.fornecedor}")
-        # print(f"- Email: {fornecedor_selecionado.fornecedor_email}")
-        # print(f"- Telefone: {fornecedor_selecionado.fornecedor_fone}")
+    print("\n=== DEBUG INFORMAÇÕES DO EQUIPAMENTO E FORNECEDORES ===")
+    print(f"Equipamento ID: {equipamento.id}")
+    print(f"Fornecedor selecionado: {fornecedor_selecionado}")
+    if fornecedor_selecionado:
+        print(f"Detalhes do fornecedor selecionado:")
+        print(f"- ID: {fornecedor_selecionado.id}")
+        print(f"- Nome: {fornecedor_selecionado.fornecedor}")
+        print(f"- Email: {fornecedor_selecionado.fornecedor_email}")
+        print(f"- Telefone: {fornecedor_selecionado.fornecedor_fone}")
 
     if request.method == 'POST':
         form = EquipamentoForm(request.POST, request.FILES, instance=equipamento)
@@ -174,17 +174,17 @@ def editar_equipamento(request, id):
     todos_fornecedores = Fornecedor.objects.all()
 
      # Print para debug dos fornecedores
-    # print("\n=== DEBUG LISTA DE FORNECEDORES ===")
-    # print(f"Quantidade total de fornecedores: {todos_fornecedores.count()}")
-    # for fornecedor in todos_fornecedores:
-        # print(f"Fornecedor ID: {fornecedor.id}, Nome: {fornecedor.fornecedor}")
+    print("\n=== DEBUG LISTA DE FORNECEDORES ===")
+    print(f"Quantidade total de fornecedores: {todos_fornecedores.count()}")
+    for fornecedor in todos_fornecedores:
+        print(f"Fornecedor ID: {fornecedor.id}, Nome: {fornecedor.fornecedor}")
 
     # Print do contexto final
-    # print("\n=== DEBUG CONTEXTO DO TEMPLATE ===")
-    # print(f"Form válido: {form.is_valid() if request.method == 'POST' else 'GET request'}")
-    # print(f"Quantidade de fornecedores no contexto: {len(todos_fornecedores)}")
-    # print(f"Fornecedor selecionado no contexto: {fornecedor_selecionado}")
-    # print("==========================================\n")
+    print("\n=== DEBUG CONTEXTO DO TEMPLATE ===")
+    print(f"Form válido: {form.is_valid() if request.method == 'POST' else 'GET request'}")
+    print(f"Quantidade de fornecedores no contexto: {len(todos_fornecedores)}")
+    print(f"Fornecedor selecionado no contexto: {fornecedor_selecionado}")
+    print("==========================================\n")
     
     return render(request, 'editar_equipamento.html', {
         'form': form,

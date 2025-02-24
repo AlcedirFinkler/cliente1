@@ -13,7 +13,8 @@ import json
 from gestaoOS.models import Chamado, Setor
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Min, Max
+from datetime import timedelta
 
 def get_month_calendar(year, month):
     cal = calendar.monthcalendar(year, month)
@@ -342,3 +343,69 @@ def gerar_os_preventiva(request, manutencao_id):
         'tecnicos': tecnicos_workload,
     }
     return render(request, 'gerar_os_preventiva.html', context)
+
+@login_required
+def gantt_manutencoes(request):
+    # Atualiza os status das manutenções
+    ManutencaoPreventiva.atualizar_todos_status()
+    
+    # Obtém todas as manutenções com relacionamentos
+    manutencoes = ManutencaoPreventiva.objects.select_related(
+        'equipamento__setor'
+    ).order_by('equipamento__setor__nome', 'equipamento__nome')
+    
+    # Calcula o período total do timeline
+    min_date = manutencoes.aggregate(Min('data_proxima_manutencao'))['data_proxima_manutencao__min']
+    max_date = manutencoes.aggregate(Max('data_proxima_manutencao'))['data_proxima_manutencao__max']
+    
+    if not min_date or not max_date:
+        return render(request, 'gantt_manutencoes.html', {
+            'error': 'Nenhuma manutenção programada encontrada'
+        })
+    
+    # Calcula o total de dias para posicionamento
+    total_days = (max_date - min_date).days + 1  # +1 para incluir o último dia
+    
+    # Gera as semanas do timeline
+    timeline = []
+    current_date = min_date
+    while current_date <= max_date:
+        timeline.append({
+            'week_start': current_date,
+            'week_number': current_date.isocalendar()[1],
+            'month': current_date.strftime('%b/%y')
+        })
+        current_date += timedelta(days=7)
+    
+    # Constrói a estrutura hierárquica
+    estrutura = {}
+    for manutencao in manutencoes:
+        setor_nome = manutencao.equipamento.setor.nome if manutencao.equipamento.setor else 'Sem Setor'
+        equipamento_nome = manutencao.equipamento.nome
+        
+        if setor_nome not in estrutura:
+            estrutura[setor_nome] = {
+                'equipamentos': {},
+                'collapsed': False
+            }
+        
+        if equipamento_nome not in estrutura[setor_nome]['equipamentos']:
+            estrutura[setor_nome]['equipamentos'][equipamento_nome] = []
+        
+        estrutura[setor_nome]['equipamentos'][equipamento_nome].append(manutencao)
+    
+    context = {
+        'estrutura': estrutura,
+        'timeline': timeline,
+        'min_date': min_date,
+        'max_date': max_date,
+        'total_days': total_days,
+        'status_colors': {
+            'programada': '#4CAF50',
+            'atrasada': '#F44336',
+            'em_execucao': '#2196F3'
+        },
+        'today': datetime.now().date()
+    }
+    
+    return render(request, 'gantt_manutencoes.html', context)

@@ -11,6 +11,7 @@ urlpatterns = [
     # path('gerar_os_preventiva/<int:manutencao_id>/', views.gerar_os_preventiva, name='gerar_os_preventiva'),
     path('manutencao/<int:manutencao_id>/gerar-os/', views.gerar_os_preventiva, name='gerar_os_preventiva'),
     path('manutencoes/criar/', views.criar_manutencao, name='criar_manutencao'),
+    path('gantt/', views.gantt_manutencoes, name='gantt_manutencoes'),
 ]
 
 if settings.DEBUG:

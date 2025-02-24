@@ -172,7 +172,11 @@ def get_user_modules(user):
     modules = [
         {"name": "Tela Inicial", "url": reverse('selecao_modulos'), "icon": "bi-house", "enabled": False},
         {"name": "Gestão OSs", "url": reverse('tela_inicial'), "icon": "bi-clipboard-check", "enabled": False},
-        {"name": "Mant. Preventivas", "url": reverse('listar_manutencoes'), "icon": "bi-tools", "enabled": False},
+        {"name": "Mant. Preventivas", "url": reverse('listar_manutencoes'), "icon": "bi-tools", "enabled": False,
+          "submenu": [
+             {"name": "Tabelas", "url": reverse('listar_manutencoes')},
+             {"name": "Gráfico Gantt", "url": reverse('gantt_manutencoes')}
+         ]},
         {"name": "Controle Estoque", "url": reverse('cadEstoque'), "icon": "bi-box", "enabled": False},
         {"name": "Cadastro Equipamentos", "url": reverse('CadEquip'), "icon": "bi-gear", "enabled": False},
         {"name": "Cadastro Fornecedores", "url": reverse('CadFornecedor'), "icon": "bi-building", "enabled": False},
