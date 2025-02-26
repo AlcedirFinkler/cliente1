@@ -151,7 +151,14 @@ class FinalizarChamadoGestorForm(forms.ModelForm):
             'status': 'Status',
             'tecnico': 'Técnico'
         }
-        
+        error_messages = {
+            'status': {
+                'required': "Preenchimento desse campo é obrigatório!"
+            },
+            'tecnico': {
+                'required': "Preenchimento desse campo é obrigatório!"
+            }
+        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -159,12 +166,5 @@ class FinalizarChamadoGestorForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        status = cleaned_data.get("status")
-        tecnico = cleaned_data.get("tecnico")
-
-        if not status:
-            self.add_error('status', "Preenchimento desse campo é obrigatório!")
-        if not tecnico:
-            self.add_error('tecnico', "Preenchimento desse campo é obrigatório!")
         
         return cleaned_data
