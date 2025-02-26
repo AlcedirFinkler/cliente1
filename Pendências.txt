@@ -47,6 +47,27 @@ Na app Relatórios:
 Reiniciar as migrações e banco de dados. Partir de um projeto "zerado" e testar o sistema passo a passo. 
 Fazer um deploy e testar com o sistema publicado. Fazer vídeos com as instruções de uso! 
 
+1 - Nas telas de "criar peça" e "Cadastrar novo Equipamento" , não está funcionando o auto-scale do Y. Se a tela excede o limite inferior, não aparece o botão de salvar. Ao adicionar fornecedor não está criando peça!! Tem algum problema com a informação do fornecedor durante o cadastro. 
+  Arrumado - o problema se resumia em o CSS não entendendo a tabela de fornecedor que era inserida. Foi deixado explícito para que o Y mude quando algum fornecedor for inserido.
+
+2 - Revisar os templates das telas:
+       GestaoOS (formato com foco em mobile)
+          - criar_chamado.html
+            Revisado
+          - finalizar_chamado.html
+          - tela_solicitante.html
+          - gerenciar_acoes.html
+          - tela_tecnico.html
+       GestaoOS (formato com foco em Desktop)
+          - gerenciar_acoes_gestor.html
+            Revisado, overhaul completo.
+
+3 - Na tela gerenciar_acoes_gestor.html, garantir que o campo "Selecione o Técnico Responsável:" venha pré-preenchido com o técnico anteriormente atribuido se existir. 
+  Ok
+
+4 - Na tela inicial do Gestor, o campo que indica o número de usuários pendentes não está mostrando valor correto.
+  Não consegui entender o porquê - talvez há algum problema com a atualização dos usuários por parte do Django. Vou dar mais uma olhada futuramente.
+
 
 ###################################################################################
 ######################## Fazer em uma segunda atualização #########################
