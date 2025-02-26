@@ -161,7 +161,9 @@
                     <select name="tecnico" id="tecnico" class="form-select" required>
                         <option value="">Selecione um técnico...</option>
                         {% for tecnico in tecnicos %}
-                            <option value="{{ tecnico.id }}">{{ tecnico.username }} ({{ tecnico.chamados_em_andamento }} em andamento)</option>
+                            <option value="{{ tecnico.id }}" {% if chamado.tecnico and tecnico.id == chamado.tecnico.id %}selected{% endif %}>
+                                {{ tecnico.username }} ({{ tecnico.chamados_em_andamento }} em andamento)
+                            </option>
                         {% endfor %}
                     </select>
                 </div>
