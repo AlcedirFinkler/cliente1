@@ -220,6 +220,7 @@
 </div>
 
 <script>
+    // Updated JS to match cria_peca.html functionality for supplier selection
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('fornecedorSearch');
         const fornecedorList = document.getElementById('fornecedorList');
@@ -237,35 +238,30 @@
             contato: document.getElementById('fornecedorContato'),
         };
         let selectedFornecedor = null;
+        const modalEl = document.getElementById('fornecedorModal');
+        
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
+        });
 
-        // Função de pesquisa de fornecedores
         searchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase();
-            const items = fornecedorList.getElementsByClassName('fornecedor-list-item');
-
-            Array.from(items).forEach(item => {
+            Array.from(fornecedorList.getElementsByClassName('fornecedor-list-item')).forEach(item => {
                 const nome = item.getAttribute('data-nome').toLowerCase();
-
-                if (nome.includes(searchTerm)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+                item.style.display = nome.includes(searchTerm) ? '' : 'none';
             });
         });
 
-        // Função para selecionar fornecedor ao clicar na lista
         fornecedorList.addEventListener('click', function (event) {
             const clickedItem = event.target.closest('.fornecedor-list-item');
-
             if (clickedItem) {
-                // Remove a seleção anterior, se houver
                 const previousSelected = fornecedorList.querySelector('.selected-fornecedor');
                 if (previousSelected) {
                     previousSelected.classList.remove('selected-fornecedor');
                 }
-
-                // Marca o item como selecionado
                 clickedItem.classList.add('selected-fornecedor');
                 selectedFornecedor = {
                     id: clickedItem.getAttribute('data-id'),
@@ -281,11 +277,7 @@
                     cnpj: clickedItem.getAttribute('data-cnpj'),
                     contato: clickedItem.getAttribute('data-contato'),
                 };
-
-                // Atualiza o display do fornecedor selecionado
                 fornecedorDisplay.textContent = `Fornecedor Selecionado: ${selectedFornecedor.nome}`;
-
-                // Atualiza os detalhes do fornecedor
                 fornecedorFields.nome.textContent = selectedFornecedor.nome;
                 fornecedorFields.fone.textContent = selectedFornecedor.fone;
                 fornecedorFields.site.textContent = selectedFornecedor.site || 'Não informado';
@@ -293,27 +285,17 @@
                 fornecedorFields.endereco.textContent = `${selectedFornecedor.rua}, Nº ${selectedFornecedor.numero}, ${selectedFornecedor.cidade} - ${selectedFornecedor.estado}`;
                 fornecedorFields.cnpj.textContent = selectedFornecedor.cnpj || 'Não informado';
                 fornecedorFields.contato.textContent = selectedFornecedor.contato || 'Não informado';
-
                 fornecedorDetails.style.display = 'table';
             }
         });
 
         selectFornecedorBtn.addEventListener('click', function () {
             if (selectedFornecedor) {
-                // Adicione um console.log para debug
                 console.log('Fornecedor ID sendo definido:', selectedFornecedor.id);
-                
-                // Defina o valor do campo hidden
-                document.getElementById('fornecedorId').value = selectedFornecedor.id;
-                
-                // Verifique se o valor foi definido
-                console.log('Valor após definição:', document.getElementById('fornecedorId').value);
-
-                // Atualiza o display
+                fornecedorId.value = selectedFornecedor.id;
+                console.log('Valor após definição:', fornecedorId.value);
                 fornecedorDisplay.textContent = `Fornecedor Selecionado: ${selectedFornecedor.nome} (ID: ${selectedFornecedor.id})`;
-
-                // Fechar o modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('fornecedorModal'));
+                const modal = bootstrap.Modal.getInstance(modalEl);
                 modal.hide();
             } else {
                 alert('Por favor, selecione um fornecedor');
@@ -321,9 +303,7 @@
         });
     });
 
-    // Adicione uma verificação antes do submit
     document.querySelector('form').addEventListener('submit', function(e) {
-        // Adicione um console.log para debug
         console.log('Valor do fornecedor no submit:', document.getElementById('fornecedorId').value);
     });
 </script>

@@ -121,6 +121,78 @@ def gerar_excel_indicadores(indicadores):
 
     return wb
 
+def gerar_excel_relatorio_pecas(pecas_necessarias):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Relatório de Peças"
+
+    headers = [
+        "Peça",
+        "Fornecedor",
+        "Quantidade Necessária",
+        "Quantidade em Estoque",
+        "Estoque Mínimo",
+        "Preço Unitário",
+        "Data Primeira Demanda",
+        "Quantidade Compra Recomendada",
+        "Valor Total"
+    ]
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="007BFF", end_color="007BFF", fill_type="solid")
+    border = Border(
+        left=Side(style='thin'), 
+        right=Side(style='thin'), 
+        top=Side(style='thin'), 
+        bottom=Side(style='thin')
+    )
+    alignment = Alignment(horizontal='center', vertical='center')
+
+    for col_index, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col_index, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = border
+        cell.alignment = alignment
+
+    # Preenche os dados das peças
+    row_number = 2
+    for peca, dados in pecas_necessarias.items():
+        ws.cell(row=row_number, column=1, value=peca.descricao)
+        fornecedor = dados.get("fornecedor")
+        ws.cell(
+            row=row_number, 
+            column=2, 
+            value=str(fornecedor) if fornecedor else "Não especificado"
+        )
+        ws.cell(row=row_number, column=3, value=dados.get("quantidade_necessaria"))
+        ws.cell(row=row_number, column=4, value=dados.get("quantidade_estoque"))
+        ws.cell(row=row_number, column=5, value=dados.get("estoque_minimo"))
+        ws.cell(row=row_number, column=6, value=dados.get("preco_unitario"))
+        data_primeira_demanda = dados.get("data_primeira_demanda")
+        ws.cell(
+            row=row_number, 
+            column=7, 
+            value=str(data_primeira_demanda) if data_primeira_demanda else "N/A"
+        )
+        ws.cell(row=row_number, column=8, value=dados.get("quantidade_compra_recomendada"))
+        ws.cell(row=row_number, column=9, value=dados.get("valor_total"))
+        row_number += 1
+
+    # Ajusta a largura das colunas com base no conteúdo
+    for col in ws.columns:
+        max_length = 0
+        column_letter = col[0].column_letter
+        for cell in col:
+            try:
+                if cell.value and len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column_letter].width = adjusted_width
+
+    return wb
+
 @login_required
 def gerar_relatorio_pecas(request):
     prazo_dias = int(request.GET.get('prazo', 30))  # Padrão configurado para 30 dias
@@ -146,6 +218,7 @@ def gerar_relatorio_pecas(request):
 
                 if peca not in pecas_necessarias:
                     pecas_necessarias[peca] = {
+                        "fornecedor": peca.fornecedor,
                         'quantidade_necessaria': 0,
                         'quantidade_estoque': peca.estoque_atual,
                         'estoque_minimo': peca.estoque_minimo,
@@ -285,6 +358,16 @@ def gerar_relatorio_pecas(request):
 
         # Constrói o documento
         doc.build(elementos)
+        return response
+
+    elif request.GET.get('exportar_excel'):
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="relatorio_pecas.xlsx"'
+        
+        wb = gerar_excel_relatorio_pecas(pecas_necessarias)
+        wb.save(response)
         return response
 
     return render(request, 'relatorios/pecas.html', {

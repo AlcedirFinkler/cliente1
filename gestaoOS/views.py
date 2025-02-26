@@ -55,6 +55,11 @@ def tela_inicial(request):
         equipamento = request.GET.get('equipamento', '').strip()
         if equipamento:
             chamados = chamados.filter(equipamento__nome__icontains=equipamento)
+        
+        # Filtro por Tipo de Manutenção
+        tipo_manutencao = request.GET.get('tipo_manutencao', '').strip()
+        if tipo_manutencao:
+            chamados = chamados.filter(tipo_manutencao=tipo_manutencao)
  
         # Filtro por Data
         data = request.GET.get('data', '')
@@ -245,6 +250,43 @@ def gerenciar_acoes(request, chamado_id):
             if form.is_valid():
                 acao = form.save(commit=False)
                 acao.chamado = chamado
+
+                try:
+                    total_horas = acao.duracao
+                except AttributeError:
+                    total_horas = 0
+
+                horas_list = request.POST.get('horas[]', '').split(',')
+                try:
+                    soma_horas = sum(float(h) for h in horas_list if h.strip())
+                except ValueError:
+                    messages.error(request, "Valor inválido nas horas dos colaboradores.")
+                    context = {
+                        'form': form,
+                        'acoes': acoes,
+                        'chamado': chamado,
+                        'acoes_com_pecas': acoes_com_pecas,
+                        'acoes_com_detalhes': acoes_com_detalhes,
+                        'pecas': pecas,
+                        'approved_technicians': approved_technicians,
+                    }
+
+                    return render(request, 'gerenciar_acoes.html', context)
+
+                if soma_horas > total_horas:
+                    messages.error(request, "A soma das horas dos colaboradores não pode ultrapassar as horas totais da ação.")
+                    context = {
+                        'form': form,
+                        'acoes': acoes,
+                        'chamado': chamado,
+                        'acoes_com_pecas': acoes_com_pecas,
+                        'acoes_com_detalhes': acoes_com_detalhes,
+                        'pecas': pecas,
+                        'approved_technicians': approved_technicians,
+                    }
+
+                    return render(request, 'gerenciar_acoes.html', context)
+
                 acao.save()
 
                 # Process collaborators

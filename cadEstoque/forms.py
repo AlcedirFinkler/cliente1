@@ -1,6 +1,7 @@
 from django import forms
 from .models import Pecas
 from CadFornecedor.models import Fornecedor
+from django.core.exceptions import ValidationError
 
 class PecasForm(forms.ModelForm):
     fornecedor = forms.ModelChoiceField(
@@ -37,3 +38,13 @@ class PecasForm(forms.ModelForm):
         # Tornar os campos específicos obrigatórios
         self.fields['codigo'].required = True
         self.fields['descricao'].required = True
+        self.fields['data_ultima_compra'].input_formats = ['%d/%m/%Y']
+
+    def clean_codigo(self):
+        codigo = self.cleaned_data.get("codigo")
+        qs = Pecas.objects.filter(codigo=codigo)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Uma peça com este código já está cadastrada.")
+        return codigo

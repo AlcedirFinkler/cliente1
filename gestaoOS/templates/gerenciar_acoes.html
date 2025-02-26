@@ -175,12 +175,18 @@
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
-                <div class="alert {{ message.tags }}">
-                    {{ message }}
-                </div>
+                {% if "error" in message.tags %}
+                    <div class="alert alert-danger">
+                {% elif "success" in message.tags %}
+                    <div class="alert alert-success">
+                {% else %}
+                    <div class="alert alert-info">
+                {% endif %}
+                        {{ message }}
+                    </div>
             {% endfor %}
         </div>
-        {% endif %}
+      {% endif %}
 
     <!-- Seção de Informações Somente Leitura -->
     <div class="mb-4">

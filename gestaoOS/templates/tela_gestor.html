@@ -22,22 +22,16 @@
     .content-container .delete-button:hover {
         background-color: rgb(255, 0 ,0);
     }
-
-    .content-container .action-link {
-        margin: 0 10px;
-    }
 </style>
 
 <div class="content-container">
     <div class="top-side">
         <h1 style="text-align: left; margin-left: 40px;">Gestão de OSs</h1>
-        <div class="actions" style="display: flex; justify-content: flex-end; align-items: center; height: 5vh;">
-            <a href="{% url 'criar_chamado' %}" class="custom-button action-link" style="width: 200px;">Novo Chamado</a>
-        </div>
+        <a href="{% url 'criar_chamado' %}" class="custom-button">Novo Chamado</a>
     </div>
 
     <!-- Formulário de filtros -->
-    <table class="tabela-sem-divisoes" style="border: none">
+    <table class="tabela-sem-divisoes" style="border: none;">
         <form method="get" action="{% url 'tela_inicial' %}">
             <!-- Filtro: Solicitante -->
             <td style="width: 15%">
@@ -101,6 +95,19 @@
                 <div>
                     <label for="equipamento">Equipamento:</label>
                     <input type="text" name="equipamento" id="equipamento" placeholder="Equipamento" value="{{ request.GET.equipamento }}">
+                </div>
+            </td>
+
+            <!-- Filtro: Tipo de Manutenção -->
+            <td style="width: 15%">
+                <div>
+                    <label for="tipo_manutencao">Tipo de Manutenção:</label>
+                    <select name="tipo_manutencao" id="tipo_manutencao">
+                        <option value="">Todos</option>
+                        <option value="preventiva" {% if request.GET.tipo_manutencao == "preventiva" %}selected{% endif %}>Preventiva</option>
+                        <option value="melhoria" {% if request.GET.tipo_manutencao == "Melhoria" %}selected{% endif %}>Melhoria</option>
+                        <option value="corretiva" {% if request.GET.tipo_manutencao == "Corretiva" %}selected{% endif %}>Corretiva</option>
+                    </select>
                 </div>
             </td>
 
@@ -174,7 +181,7 @@
                 </td>
                 <td style="text-align: center;">
                     <a href="{% url 'gerenciar_acoes' chamado.id %}" class="custom-button table-button">Editar</a>
-                    <form method="post" action="{% url 'excluir_chamado' chamado.id %}" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir este chamado?');">
+                    <form method="post" action="{% url 'excluir_chamado' chamado.id %}" style="display:inline;" onsubmit="return confirmDelete();">
                         {% csrf_token %}
                         <button type="submit" class="custom-button table-button delete-button">Excluir</button>
                     </form>
@@ -189,49 +196,6 @@
     function confirmDelete() {
         return confirm('Tem certeza que deseja excluir este chamado?');
     }
-
-    $(document).ready(function(){
-        $('[data-toggle="tooltip"]').tooltip();
-    });
-
-    // Atualiza a URL com os valores dos filtros selecionados
-    function updateFilters() {
-        const params = new URLSearchParams(window.location.search);
-
-        // Obtém os valores dos filtros
-        const status = document.getElementById('status').value;
-        const tecnico = document.getElementById('tecnico').value;
-        const setor = document.getElementById('setor').value;
-        const usuario = document.getElementById('usuario').value;
-        const tituloDescricao = document.getElementById('titulo_descricao').value;
-        const data = document.getElementById('data').value;
-
-        // Atualiza os parâmetros na URL
-        params.set('status', status);
-        params.set('tecnico', tecnico);
-        params.set('setor', setor);
-        params.set('usuario', usuario);
-        params.set('titulo_descricao', tituloDescricao);
-        params.set('data', data);
-
-        // Atualiza a URL no navegador
-        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    }
-
-    // Adiciona eventos para atualizar os filtros ao interagir com os elementos
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('status').addEventListener('change', updateFilters);
-        document.getElementById('tecnico').addEventListener('change', updateFilters);
-        document.getElementById('setor').addEventListener('change', updateFilters);
-        document.getElementById('usuario').addEventListener('input', updateFilters);
-        document.getElementById('titulo_descricao').addEventListener('input', updateFilters);
-        document.getElementById('data').addEventListener('change', updateFilters);
-    });
-
-    document.querySelector('button[type="submit"]').addEventListener('click', () => {
-        const form = document.querySelector('form');
-        form.submit();
-    });
 </script>
 
 {% endblock %}

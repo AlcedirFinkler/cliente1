@@ -11,15 +11,24 @@ OBS 4: Corrigi para que, ao logar com Estoquista, apenas os campos liberados par
 Observações a corrigir: Em "adicionar peças" e "adicionar colaboradores" na janela do técnico não está funcionando o filtro para buscar por parte do nome da peça. Precisa ser corrigido. 
 
 Na app de gestão de usuários: 
-1 - Configurar modificação de senha.  
-2 - Criar módulo na tela do gestor para criação de novos setores. Trazer isso do Admin. Talvez renomear a tela de Usuários para configurações e, ali nessa tela deixar a aprovação de usuários e criação de setores. 
+1 - Configurar modificação de senha.
+  Agora a senha é corretamente atualizada quando se edita um usuário.
+  Além disso, o setor do usuário agora é predifinido no campo de Grupo.
+2 - Criar módulo na tela do gestor para criação de novos setores. Trazer isso do Admin. Talvez renomear a tela de Usuários para configurações e, ali nessa tela, deixar a aprovação de usuários e criação de setores. 
+  Criado um novo setor, criar_setor, que contém apenas a funcionalidade de criar um setor (avaliar se isto pode ser mudado).
+  Criado um novo submenu de "configurações" que contém gestão de usuários e criação de setores.
 
 Na app de gestaoOS
 1 - Para Gestor, incluir campo "CLASSE" e permitir classificar por classe. 
+  Adicionado campo para filtrar por tipo de manutenção
 2 - Para Técnico, revisar inclusão de colaboradores. Observar para que número de horas individuais não ultrapasse número de horas totais. 
+  Concluido. Agora, o técnico receberá uma mensagem de erro caso registrar colaboradores que a soma de suas horas ultrapasse as horas totais inseridas.
 
 Na app cadEstoque
 1 - Garantir que no momento do cadastro não possa ser cadastrado duas peças com o mesmo código. 
+  Em cria_peca e edita_peca foram mudadas as funcionalidades para que, caso um código já existente tenha sido cadastrado/mudado, o usuário recebe um aviso.
+  Além disso, o backdrop do bootstrap não estava sendo corretamente excluido <- foi arrumado.
+  Por fim, o formato de data padrão estava %m/%d/%Y. Era isso que não deixava a peça ser criada. Foi trocado para %d/%m/%Y
 
 Na aba Manutenção preventiva
 1 - Revisar Cálculo automático da próxima manutenção com relação ao número de horas.
@@ -28,8 +37,12 @@ Na aba Manutenção preventiva
 Na app Relatórios:
 1 - Peças 
   1.1 - Nos campos valores, mostrar o símbolo "R$" 
+    Ok.
   1.2 - Incluir nos campos a exibição do fornecedor. 
+    Ok.
   1.3 - Incluir a geração desse relatório para Excell. 
+    Adiconado um botão que exporta a tabela para um formato excel (.xlsx).
+
 
 Reiniciar as migrações e banco de dados. Partir de um projeto "zerado" e testar o sistema passo a passo. 
 Fazer um deploy e testar com o sistema publicado. Fazer vídeos com as instruções de uso! 

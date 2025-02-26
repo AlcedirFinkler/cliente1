@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth.models import User, Group
 from gestaoUsuarios.models import CadastroPendente
-from .forms import UsuarioPendenteForm, NovoUsuarioForm
+from .forms import UsuarioPendenteForm, NovoUsuarioForm, SetorForm
+from gestaoOS.models import Setor
 
 def is_gestor(user):
     """Verifica se o usuário é do grupo Gestor"""
@@ -52,15 +53,14 @@ def editar_usuario_pendente(request, pk):
                 # Se aprovado, cria usuário no sistema
                 if usuario.is_approved:
                     from django.contrib.auth.models import User
-                    User.objects.create_user(
-                        username=usuario.username,
-                        email=usuario.email,
-                        password=usuario.senha
-                    )
+                    user, created = User.objects.get_or_create(username=usuario.username)
+                    user.email = usuario.email
+                    if usuario.senha:
+                        user.set_password(usuario.senha)
+                    user.save()
                     grupo = Group.objects.get(name=usuario.grupo)
-                    user = User.objects.get(username=usuario.username)
                     user.groups.add(grupo)
-                
+                        
                 messages.success(request, 'Usuário atualizado com sucesso!')
                 return redirect('listar_usuarios_pendentes')
             except Exception as e:
@@ -74,7 +74,6 @@ def editar_usuario_pendente(request, pk):
 @user_passes_test(is_gestor)
 def criar_usuario(request):
     if request.method == 'POST':
-        # print("hello1")
         form = NovoUsuarioForm(request.POST)
         if form.is_valid():
             try:
@@ -87,3 +86,20 @@ def criar_usuario(request):
         form = NovoUsuarioForm()
     
     return render(request, 'criar_usuario.html', {'form': form})
+
+@login_required
+@user_passes_test(is_gestor)
+def criar_setor(request):
+    if request.method == 'POST':
+        form = SetorForm(request.POST)
+        if form.is_valid():
+            nome = form.cleaned_data['nome']
+            if Setor.objects.filter(nome=nome).exists():
+                messages.error(request, "Setor com esse nome já existe!")
+            else:
+                form.save()
+                messages.success(request, "Setor criado com sucesso!")
+                return redirect('criar_setor')
+    else:
+        form = SetorForm()
+    return render(request, 'criar_setor.html', {'form': form})

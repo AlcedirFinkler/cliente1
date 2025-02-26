@@ -186,7 +186,11 @@ def get_user_modules(user):
              {"name": "Técnicos", "url": reverse('relatorio_tecnicos')},
              {"name": "Indicadores", "url": reverse('relatorio_indicadores')}
          ]},
-        {"name": "Gestão Usuários", "url": reverse('listar_usuarios_pendentes'), "icon": "bi-people", "enabled": False},
+        {"name": "Configurações", "url": reverse('listar_usuarios_pendentes'), "icon": "bi-person-fill-gear", "enabled": False,
+         "submenu": [
+             {"name": "Usuários Pendentes", "url": reverse('listar_usuarios_pendentes')},
+             {"name": "Criar Setor", "url": reverse('criar_setor')},
+        ]},
         {"name": "Horimetros", "url": reverse('device_list'), "icon": "bi-clock", "enabled": False}
     ]
     

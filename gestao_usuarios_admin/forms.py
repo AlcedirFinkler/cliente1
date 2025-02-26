@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User, Group
 from gestaoUsuarios.models import CadastroPendente
+from gestaoOS.models import Setor
 
 class UsuarioPendenteForm(forms.ModelForm):
     grupo = forms.ModelChoiceField(
@@ -16,7 +17,20 @@ class UsuarioPendenteForm(forms.ModelForm):
 
     class Meta:
         model = CadastroPendente
-        fields = ['username', 'email', 'grupo', 'is_approved']
+        fields = ['username', 'email', 'grupo', 'senha', 'is_approved']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            grupo_val = self.instance.grupo
+            if not isinstance(grupo_val, Group):
+                try:
+                    grupo_obj = Group.objects.get(name=grupo_val)
+                    self.initial['grupo'] = grupo_obj.pk
+                except Group.DoesNotExist:
+                    pass
+            else:
+                self.initial['grupo'] = grupo_val.pk
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -51,3 +65,8 @@ class NovoUsuarioForm(forms.ModelForm):
         group = self.cleaned_data['grupo']
         user.groups.add(group)
         return user
+
+class SetorForm(forms.ModelForm):
+    class Meta:
+        model = Setor
+        fields = ['nome']

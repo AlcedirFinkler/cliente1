@@ -266,6 +266,15 @@
             contato: document.getElementById('fornecedorContato'),
         };
         let selectedFornecedor = null;
+        
+        // Added modal cleanup to remove extra backdrops and restore body styles
+        const modalEl = document.getElementById('fornecedorModal');
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
+        });
 
         // Função de pesquisa de fornecedores
         searchInput.addEventListener('input', function () {

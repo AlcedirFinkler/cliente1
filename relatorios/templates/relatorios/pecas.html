@@ -84,6 +84,7 @@
                 <div class="col-md-4 text-center mt-4">
                     <button type="submit" class="btn btn-primary">Gerar Relatório</button>
                     <button type="submit" class="btn btn-secondary" name="imprimir" value="true">Imprimir</button>
+                    <button type="submit" class="btn btn-success" name="exportar_excel" value="true">Exportar Excel</button>
                 </div>
             </div>
         </form>
@@ -93,6 +94,7 @@
                 <thead>
                     <tr>
                         <th>Peça</th>
+                        <th>Fornecedor</th>
                         <th>Quantidade em Estoque</th>
                         <th>Quantidade Mínima</th>
                         <th>Quantidade Necessária</th>
@@ -106,18 +108,23 @@
                     {% for peca, dados in pecas_necessarias.items %}
                         <tr>
                             <td>{{ peca.descricao }}</td>
+                            {% if dados.fornecedor %}
+                                <td style="width: 15%;">{{ dados.fornecedor }}</td>
+                            {% else %}
+                                <td style="width: 15%;">Não encontrado</td>
+                            {% endif %}
                             <td>{{ dados.quantidade_estoque }}</td>
                             <td>{{ dados.estoque_minimo }}</td>
                             <td>{{ dados.quantidade_necessaria }}</td>
                             <td>{{ dados.data_primeira_demanda }}</td>
                             <td>{{ dados.quantidade_compra_recomendada }}</td>
-                            <td>{{ dados.preco_unitario|floatformat:2 }}</td>
-                            <td>{{ dados.valor_total|floatformat:2 }}</td>
+                            <td>R${{ dados.preco_unitario|floatformat:2 }}</td>
+                            <td>R${{ dados.valor_total|floatformat:2 }}</td>
                         </tr>
                     {% endfor %}
                     <tr>
                         <td colspan="7" style="text-align: right; font-weight: bold;">Total:</td>
-                        <td style="font-weight: bold;">{{ valor_total_compra|floatformat:2 }}</td>
+                        <td style="font-weight: bold;">R${{ valor_total_compra|floatformat:2 }}</td>
                     </tr>
                 </tbody>
             </table>
