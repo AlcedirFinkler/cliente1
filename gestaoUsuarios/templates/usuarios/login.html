@@ -1,31 +1,62 @@
-{% load static %}
+<!-- {% load static %} -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
 
     <style>
-        /* Centralização da página */
-        body {
+        /* Resetando margens e garantindo que o HTML e body ocupem toda a tela */
+        html, body {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            height: 100%;
+            width: 100%;
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
         }
 
-        /* Estilo do container principal */
+        /* Container principal com flexbox para centralização */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Estilo do container principal - responsivo */
         .login-container {
-            width: 300px;
             background: #ffffff;
             padding: 20px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
             text-align: center;
+            box-sizing: border-box;
+        }
+
+        /* Versão mobile - ocupa toda a tela */
+        @media (max-width: 768px) {
+            .login-container {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+
+        /* Versão desktop - 20% horizontal e 35% vertical */
+        @media (min-width: 769px) {
+            .login-container {
+                width: 20%;
+                height: 55%;
+                min-width: 300px;
+                min-height: 400px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
         }
 
         /* Estilo da imagem */
@@ -45,6 +76,8 @@
             padding: 10px 20px;
             cursor: pointer;
             font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -61,12 +94,13 @@
             text-decoration: underline;
         }
 
-                /* Alinha os campos de texto e os inputs verticalmente */
+        /* Alinha os campos de texto e os inputs verticalmente */
         form {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1px;
+            gap: 10px;
+            width: 100%;
         }
 
         /* Ajusta os inputs para ficarem maiores */
@@ -83,6 +117,7 @@
         /* Mensagens de alerta */
         .messages {
             margin-bottom: 20px;
+            width: 100%;
         }
 
         .alert {
@@ -105,43 +140,58 @@
             border-color: #c3e6cb;
         }
 
-                /* Reduz o tamanho do título h1 (Login) */
+        /* Reduz o tamanho do título h1 (Login) */
         h1 {
-            font-size: 20px; /* Ajuste o tamanho conforme necessário */
+            font-size: 20px;
             margin-bottom: 15px;
         }
 
         /* Reduz o tamanho do texto dos campos de entrada */
         label {
-            font-size: 16px; /* Tamanho reduzido para os labels de entrada */
+            font-size: 16px;
+            align-self: flex-start;
+        }
+
+        /* Estilos para o form em si */
+        .form-content {
+            width: 90%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* Para garantir que o form e seus elementos filhos fiquem bem formatados */
+        .form-group {
+            width: 100%;
+            margin-bottom: 10px;
         }
     </style>
-
 </head>
 <body>
     <div class="login-container">
-        <!-- Logo acima do formulário -->
-        <div class="login-logo">
-            <img src="{% static 'images/logo.png' %}" alt="Logo">
-        </div>
-
-    <h1>Login</h1>
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert {{ message.tags }}">
-                {{ message }}
+        <div class="form-content">
+            <!-- Logo acima do formulário -->
+            <div class="login-logo">
+                <img src="{% static 'images/logo.png' %}" alt="Logo">
             </div>
-        {% endfor %}
+
+            <h1>Login</h1>
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Entrar</button>
+            </form>
+            <p><a href="{% url 'cadastro' %}">Cadastre-se</a></p>
+        </div>
     </div>
-    {% endif %}
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Entrar</button>
-</form>
-<p><a href="{% url 'cadastro' %}">Cadastre-se</a></p>
-
 </body>
 </html>

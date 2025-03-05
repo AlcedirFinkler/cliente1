@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro</title>
+    <style>
+        /* Centralização da página */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        /* Estilo do container principal */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        /* Estilo da imagem */
+        .login-logo img {
+            max-width: 100%;
+            height: auto;
+            max-height: 120px; /* Limita a altura da imagem */
+            margin-bottom: 20px;
+        }
+
+        /* Estilo do botão */
+        button {
+            background-color: #1644c2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%; /* Faz o botão ocupar toda a largura */
+        }
+
+        button:hover {
+            background-color: #1644c2;
+        }
+
+        /* Links */
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Alinha os campos de texto e os inputs verticalmente */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        /* Ajusta os campos de label e input para ficarem alinhados */
+        .form-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px; /* Espaço entre os campos */
+        }
+
+        label {
+            font-size: 16px; /* Tamanho reduzido para os labels de entrada */
+            text-align: left; /* Garante que o texto do label fique alinhado à esquerda */
+            width: 120px; /* Largura fixa para os labels */
+        }
+
+        /* Ajusta os inputs para ficarem com o mesmo tamanho */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%; /* Garante que todos os inputs tenham o mesmo tamanho */
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Para garantir que o padding não afete a largura */
+        }
+
+        /* Mensagens de alerta */
+        .messages {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .alert.error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert.success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        /* Reduz o tamanho do título h1 (Cadastro) */
+        h1 {
+            font-size: 20px; /* Ajuste o tamanho conforme necessário */
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Cadastro</h1>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Agrupando os campos de label e input -->
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="text" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirm">Confirmar Senha</label>
+                <input type="password" id="password_confirm" name="password_confirm" required>
+            </div>
+
+            <!-- Campo de seleção de Grupo -->
+            <div class="form-group">
+                <label for="grupo">Grupo</label>
+                <select id="grupo" name="grupo" required>
+                    <option value="Solicitante">Solicitante</option>
+                    <option value="Técnico">Técnico</option>
+                    <option value="Estoquista">Estoquista</option>
+                    <option value="Gestor">Gestor</option>
+                </select>
+            </div>
+
+            <button type="submit">Cadastrar</button>
+        </form>
+        <p><a href="{% url 'login' %}">Voltar para o Login</a></p>
+    </div>
+</body>
+</html>

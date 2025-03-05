@@ -2,12 +2,18 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro</title>
     <style>
-        /* Centralização da página */
-        body {
+        /* Reset e configurações básicas */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Centralização da página */
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,10 +22,9 @@
             background-color: #f4f4f4;
         }
 
-        /* Estilo do container principal */
+        /* Estilo do container principal - responsivo */
         .login-container {
             width: 100%;
-            max-width: 400px;
             background: #ffffff;
             padding: 20px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
@@ -29,6 +34,16 @@
             flex-direction: column;
             align-items: stretch;
             gap: 20px;
+        }
+
+        /* Media query para desktop */
+        @media (min-width: 768px) {
+            .login-container {
+                width: 30%;
+                height: 45vh;
+                min-height: 450px; /* Altura mínima para garantir que o conteúdo caiba */
+                overflow-y: auto; /* Adiciona barra de rolagem se o conteúdo exceder a altura */
+            }
         }
 
         /* Estilo da imagem */
@@ -91,7 +106,8 @@
         /* Ajusta os inputs para ficarem com o mesmo tamanho */
         input[type="text"],
         input[type="password"],
-        input[type="email"] {
+        input[type="email"],
+        select {
             width: 100%; /* Garante que todos os inputs tenham o mesmo tamanho */
             padding: 10px;
             font-size: 14px;
@@ -132,6 +148,18 @@
             margin-bottom: 20px;
         }
 
+        /* Ajuste para mobile em telas muito pequenas */
+        @media (max-width: 480px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
