@@ -102,4 +102,4 @@ def criar_setor(request):
                 return redirect('criar_setor')
     else:
         form = SetorForm()
-    return render(request, 'criar_setor.html', {'form': form})
+    return render(request, 'criar_setor.html', {'form': form, 'setores': Setor.objects.all()})

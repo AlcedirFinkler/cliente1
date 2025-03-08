@@ -168,19 +168,43 @@
             </tbody>
         </table>
 
+        <!-- Botão para abrir modal do fluxograma explicativo -->
+        <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#fluxogramaModal">
+            Ver Fluxograma Explicativo
+        </button>
+
+        <!-- Seção dos campos com descrição interativa -->
         <div class="form-row">
             <div class="form-group col-md-4">
-                {{ form.ssma.label_tag }}
+                <div class="label-with-description">
+                    {{ form.ssma.label_tag }}
+                    <button type="button" class="btn btn-info btn-sm" onclick="toggleDescription('desc_ssma')">?</button>
+                </div>
+                <div id="desc_ssma" class="field-description" style="display:none;">
+                    <small><em>SSMA refere-se às práticas de Saúde, Segurança e Meio Ambiente.</em></small>
+                </div>
                 {{ form.ssma }}
                 {{ form.ssma.errors }}
             </div>
             <div class="form-group col-md-4">
-                {{ form.qualidade.label_tag }}
+                <div class="label-with-description">
+                    {{ form.qualidade.label_tag }}
+                    <button type="button" class="btn btn-info btn-sm" onclick="toggleDescription('desc_qualidade')">?</button>
+                </div>
+                <div id="desc_qualidade" class="field-description" style="display:none;">
+                    <small><em>A qualidade diz respeito aos padrões e normas do equipamento.</em></small>
+                </div>
                 {{ form.qualidade }}
                 {{ form.qualidade.errors }}
             </div>
             <div class="form-group col-md-4">
-                {{ form.operacao.label_tag }}
+                <div class="label-with-description">
+                    {{ form.operacao.label_tag }}
+                    <button type="button" class="btn btn-info btn-sm" onclick="toggleDescription('desc_operacao')">?</button>
+                </div>
+                <div id="desc_operacao" class="field-description" style="display:none;">
+                    <small><em>A operação relaciona-se ao desempenho e uso do equipamento.</em></small>
+                </div>
                 {{ form.operacao }}
                 {{ form.operacao.errors }}
             </div>
@@ -188,17 +212,35 @@
 
         <div class="form-row">
             <div class="form-group col-md-4">
-                {{ form.entrega.label_tag }}
+                <div class="label-with-description">
+                    {{ form.entrega.label_tag }}
+                    <button type="button" class="btn btn-info btn-sm" onclick="toggleDescription('desc_entrega')">?</button>
+                </div>
+                <div id="desc_entrega" class="field-description" style="display:none;">
+                    <small><em>A entrega se refere à condição de recebimento e instalação do equipamento.</em></small>
+                </div>
                 {{ form.entrega }}
                 {{ form.entrega.errors }}
             </div>
             <div class="form-group col-md-4">
-                {{ form.mtbf.label_tag }}
+                <div class="label-with-description">
+                    {{ form.mtbf.label_tag }}
+                    <button type="button" class="btn btn-info btn-sm" onclick="toggleDescription('desc_mtbf')">?</button>
+                </div>
+                <div id="desc_mtbf" class="field-description" style="display:none;">
+                    <small><em>MTBF (Mean Time Between Failures) indica a média de tempo entre falhas.</em></small>
+                </div>
                 {{ form.mtbf }}
                 {{ form.mtbf.errors }}
             </div>
             <div class="form-group col-md-4">
-                {{ form.mttr.label_tag }}
+                <div class="label-with-description">
+                    {{ form.mttr.label_tag }}
+                    <button type="button" class="btn btn-info btn-sm" onclick="toggleDescription('desc_mttr')">?</button>
+                </div>
+                <div id="desc_mttr" class="field-description" style="display:none;">
+                    <small><em>MTTR (Mean Time To Repair) refere-se ao tempo médio de reparo.</em></small>
+                </div>
                 {{ form.mttr }}
                 {{ form.mttr.errors }}
             </div>
@@ -242,6 +284,72 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     <button type="button" class="btn btn-primary" id="selectFornecedorBtn">Selecionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Fluxograma -->
+    <div class="modal fade" id="fluxogramaModal" tabindex="-1" aria-labelledby="fluxogramaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fluxogramaModalLabel">Fluxograma Explicativo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Tabela de Descrições -->
+                    <h6>Descrição dos Níveis</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Opção</th>
+                                <th>Nível A</th>
+                                <th>Nível B</th>
+                                <th>Nível C</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SSMA</td>
+                                <td>Não causa acidente ou dano material</td>
+                                <td>Pode causar perda material, porém sem danos as pessoas e ao meio ambiente</td>
+                                <td>Pode causar acidentes a pessoas ou ao meio ambiente</td>
+                            </tr>
+                            <tr>
+                                <td>Qualidade</td>
+                                <td>Não perde a qualidade e não afeta o cliente, porém pode gerar sucata</td>
+                                <td>Existe possibilidade de perda de qualidade e/ou reclamação de cliente</td>
+                                <td>Causará perda de qualidade e/ou reclamação do cliente</td>
+                            </tr>
+                            <tr>
+                                <td>Operação</td>
+                                <td>Equipamento com operação em 1 turno</td>
+                                <td>Equipamento com operação em 2 turnos</td>
+                                <td>Equipamento com operação em 3 turnos</td>
+                            </tr>
+                            <tr>
+                                <td>Entrega</td>
+                                <td>Não interfere nas linhas de produção</td>
+                                <td>Pode parar uma linha de produção, porém há equipamentos backup</td>
+                                <td>Pode parar uma linha de produção e não há equipamentos backup</td>
+                            </tr>
+                            <tr>
+                                <td>MTBF</td>
+                                <td>Baixo</td>
+                                <td>Média</td>
+                                <td>Alta</td>
+                            </tr>
+                            <tr>
+                                <td>MTTR</td>
+                                <td>Baixo</td>
+                                <td>Média</td>
+                                <td>Alta</td>
+                            </tr>
+                        </tbody>
+                    </table>                  
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
@@ -363,6 +471,11 @@
         // Adicione um console.log para debug
         console.log('Valor do fornecedor no submit:', document.getElementById('fornecedorId').value);
     });
+
+    function toggleDescription(id) {
+        var desc = document.getElementById(id);
+        desc.style.display = (desc.style.display === "none" || desc.style.display === "") ? "block" : "none";
+    }
 </script>
 
 <!-- Bootstrap JS Bundle -->

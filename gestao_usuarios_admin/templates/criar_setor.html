@@ -7,4 +7,24 @@
       {{ form.as_p }}
       <button type="submit" class="btn btn-primary">Criar Setor</button>
   </form>
+  <br>
+  <h1>Lista de Setores Existentes:</h1>
+  <table class="table table-striped">
+      <thead>
+          <tr>
+              <th scope="col">Nome do Setor</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for setor in setores %}
+              <tr>
+                  <td>{{ setor.nome }}</td>
+              </tr>
+          {% empty %}
+              <tr>
+                  <td>Nenhum setor encontrado.</td>
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>
 {% endblock %}

@@ -97,6 +97,7 @@
                 <th>Modelo</th>
                 <th>Setor</th>
                 <th>Classe</th>
+                <th>Foto</th> 
                 <th>Ações</th>
             </tr>
         </thead>
@@ -109,6 +110,13 @@
                     <td>{{ equipamento.modelo }}</td>
                     <td>{{ equipamento.setor.nome }}</td>
                     <td>{{ equipamento.classe }}</td>
+                    <td style="text-align: center;">
+                        {% if equipamento.foto %}
+                            <img src="{{ equipamento.foto.url }}" alt="Foto do equipamento {{ equipamento.nome }}" style="max-width: 100px; max-height: 100px;">
+                        {% else %}
+                            Sem foto
+                        {% endif %}
+                    </td>
                     <td style="text-align: center;">
                         <a href="{% url 'editar_equipamento' equipamento.id %}" class="custom-button table-button">Editar</a>
                         <form method="post" action="{% url 'excluir_equipamento' equipamento.id %}" style="display:inline;" onsubmit="return confirmDelete();">
