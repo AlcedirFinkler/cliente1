@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from .forms import FornecedorForm
 from .models import Fornecedor
 from django.contrib import messages
+import openpyxl
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from django.http import HttpResponse
 
 @login_required
 def CadFornecedor(request):
@@ -22,7 +25,15 @@ def CadFornecedor(request):
     telefone = request.GET.get('telefone')
     if telefone:
         fornecedores = fornecedores.filter(fornecedor_fone__icontains=telefone)
-    
+        
+    # Exportar Excel se solicitado
+    if request.GET.get('exportar_excel'):
+        wb = gerar_excel_fornecedores(fornecedores)
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="fornecedores.xlsx"'
+        wb.save(response)
+        return response
+
     return render(request, 'CadFornecedor.html', {
         'fornecedores': fornecedores
     })
@@ -68,3 +79,40 @@ def editar_fornecedor(request, id):
         form = FornecedorForm(instance=fornecedor)
 
     return render(request, 'editar_fornecedor.html', {'form': form})
+
+def gerar_excel_fornecedores(fornecedores):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Fornecedores"
+
+    headers = ["Nome do Fornecedor", "Telefone", "Site", "Email"]
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="007BFF", end_color="007BFF", fill_type="solid")
+    border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    alignment = Alignment(horizontal='center', vertical='center')
+
+    # Add header row
+    for col, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = border
+        cell.alignment = alignment
+
+    row_num = 2
+    for f in fornecedores:
+        ws.cell(row=row_num, column=1, value=f.fornecedor)
+        ws.cell(row=row_num, column=2, value=f.fornecedor_fone)
+        ws.cell(row=row_num, column=3, value=f.fornecedor_site)
+        ws.cell(row=row_num, column=4, value=f.fornecedor_email)
+        row_num += 1
+
+    for col in ws.columns:
+        max_length = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws.column_dimensions[col_letter].width = max_length + 2
+
+    return wb

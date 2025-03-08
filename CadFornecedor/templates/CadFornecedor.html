@@ -27,7 +27,10 @@
 <div class="content-container">
     <div class="top-side">
         <h1 style="text-align: left; margin-left: 40px;">Gestão de Fornecedores</h1>
-        <a href="{% url 'CriaFornecedor' %}" class="custom-button">Cadastrar Novo Fornecedor</a>
+        <div>
+            <button type="submit" class="btn btn-success" name="exportar_excel" value="true">Exportar Excel</button>
+            <a href="{% url 'CriaFornecedor' %}" class="custom-button">Cadastrar Novo Fornecedor</a>
+        </div>
     </div>
 
     <!-- Formulário de filtros -->
@@ -57,7 +60,7 @@
                 </div>
             </td>
 
-            <!-- Botão "Filtrar" -->
+            <!-- Botões -->
             <td style="width: 10%;">
                 <div style="text-align: center;">
                     <button type="submit" class="btn btn-primary">Filtrar</button>

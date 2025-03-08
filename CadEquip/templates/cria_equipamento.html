@@ -289,7 +289,6 @@
         </div>
     </div>
 
-    <!-- Modal do Fluxograma -->
     <div class="modal fade" id="fluxogramaModal" tabindex="-1" aria-labelledby="fluxogramaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -298,7 +297,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Tabela de Descrições -->
                     <h6>Descrição dos Níveis</h6>
                     <table class="table table-bordered">
                         <thead>
@@ -375,7 +373,6 @@
         };
         let selectedFornecedor = null;
         
-        // Added modal cleanup to remove extra backdrops and restore body styles
         const modalEl = document.getElementById('fornecedorModal');
         modalEl.addEventListener('hidden.bs.modal', function () {
             document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
@@ -478,7 +475,6 @@
     }
 </script>
 
-<!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 {% endblock %}

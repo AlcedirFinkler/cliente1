@@ -30,6 +30,10 @@
     {% csrf_token %}
     <h1 style="text-align: center;">Monitor de ESP32/ESP8266</h1>
     <div class="container mt-5">
+        <!-- Filtro para buscar equipamentos por nome ou TAG -->
+        <div class="mb-3">
+            <input type="text" id="equipmentTableSearch" class="form-control" placeholder="Buscar equipamentos por nome ou TAG">
+        </div>
         <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#equipmentModal">
             Adicionar Dispositivo ESP
         </button>
@@ -196,6 +200,16 @@
                         console.error('Erro AJAX:', xhr.status, xhr.responseText);
                         alert('Erro ao alternar atualização: ' + (xhr.responseJSON?.message || xhr.statusText));
                     }
+                });
+            });
+
+            // Filtro para a tabela de equipamentos por nome ou TAG
+            $('#equipmentTableSearch').on('input', function() {
+                const searchTerm = $(this).val().toLowerCase();
+                $('table tbody tr').each(function() {
+                    const nome = $(this).find('td:nth-child(1)').text().toLowerCase();
+                    const tag = $(this).find('td:nth-child(2)').text().toLowerCase();
+                    $(this).toggle(nome.includes(searchTerm) || tag.includes(searchTerm));
                 });
             });
 

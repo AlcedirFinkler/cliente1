@@ -8,6 +8,8 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 from django.contrib import messages
 from django.db.models import Q
+import openpyxl
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 
 @login_required
 def teste(request):
@@ -39,7 +41,6 @@ def cria_equipamento(request):
                 except Fornecedor.DoesNotExist:
                     form.add_error('fornecedor', 'Fornecedor selecionado não existe.')
  
-            # Explicitly set patrimonio to None if it's an empty string
             if not equipamento.patrimonio or equipamento.patrimonio.strip() == '':
                 equipamento.patrimonio = None
 
@@ -120,6 +121,15 @@ def listar_equipamentos(request):
     
     setores = Setor.objects.all()
     
+    if request.GET.get('exportar_excel'):
+        wb = gerar_excel_equipamentos(equipamentos)
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="equipamentos.xlsx"'
+        wb.save(response)
+        return response
+
     return render(request, 'CadEquipHome.html', {
         'equipamentos': equipamentos,
         'setores': setores
@@ -240,3 +250,53 @@ def busca_fornecedores(request):
     ]
     
     return JsonResponse({'fornecedores': resultados})
+
+def gerar_excel_equipamentos(equipamentos):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Equipamentos"
+
+    headers = ["TAG", "Nome", "Fabricante", "Modelo", "Setor", "Classe"]
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="007BFF", end_color="007BFF", fill_type="solid")
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    alignment = Alignment(horizontal='center', vertical='center')
+
+    # Add header
+    for col, header in enumerate(headers, start=1):
+        cell = ws.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.border = border
+        cell.alignment = alignment
+
+    row_num = 2
+    for equip in equipamentos:
+        ws.cell(row=row_num, column=1, value=equip.tag or "-")
+        ws.cell(row=row_num, column=2, value=equip.nome)
+        ws.cell(row=row_num, column=3, value=equip.fabricante)
+        ws.cell(row=row_num, column=4, value=equip.modelo)
+        ws.cell(row=row_num, column=5, value=getattr(equip.setor, 'nome', '-'))
+        ws.cell(row=row_num, column=6, value=equip.classe or "-")
+        row_num += 1
+
+    # Adjust column widths
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                try:
+                    length = len(str(cell.value))
+                    if length > max_length:
+                        max_length = length
+                except:
+                    pass
+        ws.column_dimensions[column].width = max_length + 2
+
+    return wb
