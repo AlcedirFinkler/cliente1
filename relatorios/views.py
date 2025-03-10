@@ -661,6 +661,21 @@ def gerar_relatorio_indicadores(request):
 
     meses_labels = [f"{mes}/{ano}" for ano, mes in meses_analise]
 
+    if not request.GET.get('exportar_excel') and not request.GET.get('imprimir'):
+        from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+        paginator = Paginator(indicadores, 25)  # 25 items por página
+        page = request.GET.get('page')
+        try:
+            indicadores_page = paginator.page(page)
+        except PageNotAnInteger:
+            indicadores_page = paginator.page(1)
+        except EmptyPage:
+            indicadores_page = paginator.page(paginator.num_pages)
+        indicadores = indicadores_page
+        is_paginated = paginator.num_pages > 1
+    else:
+        is_paginated = False
+
     if request.GET.get('exportar_excel'):
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -869,6 +884,8 @@ def gerar_relatorio_indicadores(request):
     dados_disp_equip = {k: list(map(float, v['disponibilidade'])) for k, v in dados_equip_selecionados.items()}
         
     context = {
+        'page_obj': indicadores,  # replace 'indicadores' with the paginated object
+        'is_paginated': is_paginated,
         'indicadores': indicadores,
         'setores': Setor.objects.all(),
         'classes': list(set(Equipamento.objects.values_list('classe', flat=True).distinct())),
