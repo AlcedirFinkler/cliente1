@@ -453,7 +453,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedParts = new Map();
     let selectedCollaborators = new Map();
 
-    // Parts selection functionality
     partsList.addEventListener('click', function(event) {
         if (event.target.classList.contains('part-quantity')) {
             return;
@@ -521,7 +520,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Collaborators selection functionality
     collaboratorsList.addEventListener('click', function(event) {
         if (event.target.classList.contains('collaborator-hours') || event.target.classList.contains('collaborator-activity')) {
             return;
@@ -589,10 +587,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Ensure hidden fields are updated before form submission
     document.querySelector('form').addEventListener('submit', function() {
         updatePartsHiddenFields();
         updateCollaboratorsHiddenFields();
+    });
+
+    document.getElementById('partsSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const partItems = document.querySelectorAll('#partsList .part-list-item');
+        
+        partItems.forEach(item => {
+            const descricao = item.getAttribute('data-descricao').toLowerCase();
+            if (descricao.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    document.getElementById('collaboratorsSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const collaboratorItems = document.querySelectorAll('#collaboratorsList .collaborator-list-item');
+        
+        collaboratorItems.forEach(item => {
+            const nome = item.getAttribute('data-nome').toLowerCase();
+            if (nome.includes(searchTerm)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     });
 });
 </script>

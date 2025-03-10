@@ -7,6 +7,7 @@
 <style>
     .gantt-container {
         overflow-x: auto;
+        overflow-y: visible;  /* allow vertical overflow to be visible */
         padding: 20px;
         background: white;
         border-radius: 8px;
@@ -64,7 +65,7 @@
         top: 0;
         z-index: 3;
         background: white;
-        overflow: hidden;
+        overflow: visible;  /* changed from hidden to visible */
     }
 
     .timeline-header {
@@ -127,6 +128,8 @@
         position: sticky;
         left: 0;
         width: 300px;
+        min-width: 300px; 
+        flex: 0 0 300px; 
         background: white;
         z-index: 2;
         padding: 10px;
@@ -395,6 +398,9 @@
         const bars = document.querySelectorAll('.gantt-bar');
         const minDate = new Date('{{ min_date|date:"Y-m-d" }}');
         const maxDate = new Date('{{ max_date|date:"Y-m-d" }}');
+        // New: Extend maxDate by one day to avoid a hard cutoff
+        const effectiveMaxDate = new Date(maxDate);
+        effectiveMaxDate.setDate(effectiveMaxDate.getDate() + 1);
         const totalDuration = maxDate - minDate;
         const containerWidth = document.querySelector('.bars-container').offsetWidth;
         const today = new Date();
@@ -402,8 +408,8 @@
         // Gerar cabeçalhos para diferentes escalas
         generateTimelineHeaders(minDate, maxDate);
         
-        // Posicionar a linha de "hoje"
-        if (today >= minDate && today <= maxDate) {
+        // Posicionar a linha de "hoje" usando effectiveMaxDate
+        if (today >= minDate && today <= effectiveMaxDate) {
             const daysFromStart = Math.floor((today - minDate) / (1000 * 3600 * 24));
             const leftPercent = (daysFromStart / {{ total_days }}) * 100;
             
@@ -453,6 +459,31 @@
             
             bar.addEventListener('mouseout', function() {
                 document.getElementById('gantt-tooltip').style.display = 'none';
+            });
+
+            bar.addEventListener('mouseenter', function(e) {
+                let widget = document.createElement('div');
+                widget.className = 'hover-name-widget';
+                widget.innerText = this.dataset.descricao;
+                widget.style.position = 'fixed'; // changed to fixed
+                widget.style.background = 'rgba(0,0,0,0.7)';
+                widget.style.color = '#fff';
+                widget.style.padding = '2px 5px';
+                widget.style.borderRadius = '4px';
+                widget.style.fontSize = '12px';
+                widget.style.pointerEvents = 'none';
+                const rect = this.getBoundingClientRect();
+                widget.style.top = (rect.top - 28) + 'px';
+                widget.style.left = rect.left + 'px';
+                widget.style.zIndex = 10000;
+                document.body.appendChild(widget);
+                this._hoverWidget = widget;
+            });
+            bar.addEventListener('mouseleave', function(e) {
+                if(this._hoverWidget){
+                    this._hoverWidget.remove();
+                    delete this._hoverWidget;
+                }
             });
         });
         
@@ -562,14 +593,10 @@
         
         // Função para gerar os cabeçalhos de timeline para diferentes escalas
         function generateTimelineHeaders(minDate, maxDate) {
-            // Para visualização semanal
-            generateWeeklyHeader(minDate, maxDate);
-            
-            // Para visualização trimestral
-            generateQuarterlyHeader(minDate, maxDate);
-            
-            // Para visualização anual
-            generateYearlyHeader(minDate, maxDate);
+            // Use effectiveMaxDate instead of maxDate in loops
+            generateWeeklyHeader(minDate, effectiveMaxDate);
+            generateQuarterlyHeader(minDate, effectiveMaxDate);
+            generateYearlyHeader(minDate, effectiveMaxDate);
         }
         
         function generateWeeklyHeader(minDate, maxDate) {
@@ -578,7 +605,7 @@
             
             let currentDate = new Date(minDate);
             
-            while (currentDate <= maxDate) {
+            while (currentDate <= maxDate) { // now uses effectiveMaxDate
                 const weekEl = document.createElement('div');
                 weekEl.className = 'timeline-week';
                 weekEl.style.width = '140px'; // 20px por dia * 7 dias
