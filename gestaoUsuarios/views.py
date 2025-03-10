@@ -82,7 +82,7 @@ def login_view(request):
                         return redirect('tela_inicial')
                     elif testegrupo == "Estoquista":
                         print('Renderiza Estoquista!')
-                        return redirect('modulos')
+                        return redirect('selecao_modulos')
                     elif testegrupo == "Técnico":
                         print('Renderiza técnico!')
                         return redirect('tela_inicial')
@@ -235,22 +235,33 @@ def modulos(request):
 @login_required
 def selecao_modulos(request):
     modules = get_user_modules(request.user)
+    is_estoquista = request.user.groups.filter(name="Estoquista").exists()
     
-    duas_semanas = datetime.now() + timedelta(weeks=2)
-    
-    context = {
-        'modules': modules,
-        'manutencoes_atrasadas': ManutencaoPreventiva.objects.filter(
-            data_proxima_manutencao__lt=datetime.now(), 
-            status='atrasada'
-        ),
-        'oss_pendentes': Chamado.objects.filter(status='pendente'),
-        'pecas_estoque_minimo': Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo')),
-        'usuarios_pendentes': User.objects.filter(is_active=False),
-        'proximas_manutencoes': ManutencaoPreventiva.objects.filter(
-            data_proxima_manutencao__lte=duas_semanas, 
-            status='programada'
-        ),
-    }
-    
+    if is_estoquista:
+        context = {
+            'modules': modules,
+            'pecas_estoque_minimo': Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo')),
+            'pecas_proximas_estoque': Pecas.objects.filter(
+                estoque_atual__gte=F('estoque_minimo'),
+                estoque_atual__lt=F('estoque_minimo') * 1.2
+            ),
+            'is_estoquista': True,
+        }
+    else:
+        duas_semanas = datetime.now() + timedelta(weeks=2)
+        context = {
+            'modules': modules,
+            'manutencoes_atrasadas': ManutencaoPreventiva.objects.filter(
+                data_proxima_manutencao__lt=datetime.now(), 
+                status='atrasada'
+            ),
+            'oss_pendentes': Chamado.objects.filter(status='pendente'),
+            'pecas_estoque_minimo': Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo')),
+            'usuarios_pendentes': User.objects.filter(is_active=False),
+            'proximas_manutencoes': ManutencaoPreventiva.objects.filter(
+                data_proxima_manutencao__lte=duas_semanas, 
+                status='programada'
+            ),
+            'is_estoquista': False,
+        }
     return render(request, 'usuarios/selecao_modulos.html', context)
