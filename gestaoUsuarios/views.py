@@ -257,7 +257,9 @@ def selecao_modulos(request):
             ),
             'oss_pendentes': Chamado.objects.filter(status='pendente'),
             'pecas_estoque_minimo': Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo')),
+            #'usuarios_pendentes': User.objects.filter(is_active=False),
             'usuarios_pendentes': User.objects.filter(is_active=False),
+            'usuarios_pendentes': CadastroPendente.objects.filter(is_approved=False),
             'proximas_manutencoes': ManutencaoPreventiva.objects.filter(
                 data_proxima_manutencao__lte=duas_semanas, 
                 status='programada'

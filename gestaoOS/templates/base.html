@@ -56,13 +56,57 @@
             padding-left: 20px;
             display: block;
         }
+        
+        /* Estilos customizados para os menus */
+        .custom-dropdown-menu {
+            display: none;
+            padding: 0.5rem 0;
+            margin: 0.125rem 0 0;
+            background-color: #343a40;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.25rem;
+            list-style: none;
+        }
+        
+        .custom-dropdown-menu.show {
+            display: block;
+        }
+        
+        .custom-dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.25rem 1.5rem;
+            clear: both;
+            font-weight: 400;
+            color: white;
+            text-align: inherit;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+            text-decoration: none;
+        }
+        
+        .custom-dropdown-item:hover {
+            background-color: #495057;
+            color: white;
+        }
+        
+        .nav-item.dropdown {
+            position: relative;
+        }
+        
+        .custom-dropdown-menu {
+            position: relative;
+            width: 100%;
+            padding-left: 2rem;
+        }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Chamados{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" type="text/css">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             padding-top: 56px; /* Ajuste conforme a altura da navbar */
@@ -85,17 +129,17 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav" id="main-menu">
                 {% for module in modules %}
                     {% if module.enabled %}
                         {% if module.submenu %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="{{ module.icon }}"></i> {{ module.name }}
+                                <a class="nav-link" href="javascript:void(0);" onclick="toggleCustomMenu('menu-{{ module.name|slugify }}')">
+                                    <i class="{{ module.icon }}"></i> {{ module.name }} <i class="bi bi-chevron-down ms-1"></i>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-dark">
+                                <ul class="custom-dropdown-menu" id="menu-{{ module.name|slugify }}">
                                     {% for submenu_item in module.submenu %}
-                                        <li><a class="dropdown-item" href="{{ submenu_item.url }}">{{ submenu_item.name }}</a></li>
+                                        <li><a class="custom-dropdown-item" href="{{ submenu_item.url }}">{{ submenu_item.name }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -118,62 +162,113 @@
     </main>
     
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Bootstrap JS e Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-    let offcanvas = document.getElementById('offcanvasNavbar');
-    offcanvas.addEventListener('show.bs.offcanvas', function () {
-        fetch("{% url 'api_modules' %}")
-            .then(response => response.json())
-            .then(data => {
-                let menuContainer = document.querySelector('.offcanvas-body ul.navbar-nav');
-                if (menuContainer) {
-                    // Limpa o conteúdo atual
-                    menuContainer.innerHTML = '';
-                    
-                    // Cria os itens de menu com base nos módulos atualizados
-                    data.modules.forEach(function(module) {
-                        if (module.enabled) {
-                            let li = document.createElement('li');
-                            li.className = 'nav-item';
-                            
-                            // Verifica se o módulo tem submenu
-                            if (module.submenu) {
-                                li.classList.add('dropdown');
-                                li.innerHTML = `
-                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="${module.icon}"></i> ${module.name}
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-dark">
-                                        ${module.submenu.map(sub => `<li><a class="dropdown-item" href="${sub.url}">${sub.name}</a></li>`).join('')}
-                                    </ul>
-                                `;
-                            } else {
-                                li.innerHTML = `
-                                    <a class="nav-link" href="${module.url}">
-                                        <i class="${module.icon}"></i> ${module.name}
-                                    </a>
-                                `;
-                            }
-                            menuContainer.appendChild(li);
-                        }
-                    });
-
-                    // Reinserir o item "Sair"
-                    let liLogout = document.createElement('li');
-                    liLogout.className = 'nav-item';
-                    liLogout.innerHTML = `<a href="{% url 'login' %}" class="btn btn-danger mt-3"><i class="bi bi-box-arrow-right"></i> Sair</a>`;
-                    menuContainer.appendChild(liLogout);
+        // Sistema de menu completamente customizado
+        function toggleCustomMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            if (menu) {
+                const isCurrentlyShown = menu.classList.contains('show');
+                
+                // Primeiro, feche todos os menus
+                document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
+                    m.classList.remove('show');
+                });
+                
+                // Se o menu não estava aberto antes, abra-o
+                if (!isCurrentlyShown) {
+                    menu.classList.add('show');
                 }
-            })
-            .catch(error => console.error('Erro ao carregar módulos:', error));
-    });
-});
+            }
+        }
+        
+        // Função para criar elementos de menu usando nossa estrutura customizada
+        function createCustomMenu(modules) {
+            let menuContainer = document.querySelector('.offcanvas-body ul.navbar-nav');
+            if (!menuContainer) return;
+            
+            // Limpa o conteúdo atual
+            menuContainer.innerHTML = '';
+            
+            // Cria os itens de menu com base nos módulos atualizados
+            modules.forEach(function(module) {
+                if (module.enabled) {
+                    let li = document.createElement('li');
+                    li.className = 'nav-item';
+                    
+                    // Verifica se o módulo tem submenu
+                    if (module.submenu && module.submenu.length > 0) {
+                        li.classList.add('dropdown');
+                        const menuId = 'menu-' + module.name.toLowerCase().replace(/\s+/g, '-');
+                        
+                        let moduleLink = document.createElement('a');
+                        moduleLink.className = 'nav-link';
+                        moduleLink.href = 'javascript:void(0);';
+                        moduleLink.innerHTML = `<i class="${module.icon}"></i> ${module.name} <i class="bi bi-chevron-down ms-1"></i>`;
+                        moduleLink.setAttribute('onclick', `toggleCustomMenu('${menuId}')`);
+                        
+                        let submenu = document.createElement('ul');
+                        submenu.className = 'custom-dropdown-menu';
+                        submenu.id = menuId;
+                        
+                        // Adiciona itens de submenu
+                        module.submenu.forEach(sub => {
+                            let subItem = document.createElement('li');
+                            let subLink = document.createElement('a');
+                            subLink.className = 'custom-dropdown-item';
+                            subLink.href = sub.url;
+                            subLink.textContent = sub.name;
+                            subItem.appendChild(subLink);
+                            submenu.appendChild(subItem);
+                        });
+                        
+                        li.appendChild(moduleLink);
+                        li.appendChild(submenu);
+                    } else {
+                        li.innerHTML = `
+                            <a class="nav-link" href="${module.url}">
+                                <i class="${module.icon}"></i> ${module.name}
+                            </a>
+                        `;
+                    }
+                    menuContainer.appendChild(li);
+                }
+            });
 
+            // Reinserir o item "Sair"
+            let liLogout = document.createElement('li');
+            liLogout.className = 'nav-item';
+            liLogout.innerHTML = `<a href="{% url 'login' %}" class="btn btn-danger mt-3"><i class="bi bi-box-arrow-right"></i> Sair</a>`;
+            menuContainer.appendChild(liLogout);
+        }
+        
+        // Inicializa a fetch API para atualizar o menu dinamicamente
+        document.addEventListener("DOMContentLoaded", function () {
+            // Busca e inicializa os menus quando o offcanvas é aberto
+            let offcanvas = document.getElementById('offcanvasNavbar');
+            if (offcanvas) {
+                offcanvas.addEventListener('show.bs.offcanvas', function () {
+                    fetch("{% url 'api_modules' %}")
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.modules) {
+                                createCustomMenu(data.modules);
+                            }
+                        })
+                        .catch(error => console.error('Erro ao carregar módulos:', error));
+                });
+            }
+            
+            // Fecha menus ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.nav-item.dropdown') && !e.target.matches('[onclick*="toggleCustomMenu"]')) {
+                    document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+        });
     </script>
 </body>
 </html>
