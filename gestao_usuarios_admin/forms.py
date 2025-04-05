@@ -1,3 +1,4 @@
+# forms.py from gestao_usuarios_admin 
 from django import forms
 from django.contrib.auth.models import User, Group
 from gestaoUsuarios.models import CadastroPendente
@@ -12,7 +13,8 @@ class UsuarioPendenteForm(forms.ModelForm):
     senha = forms.CharField(
         widget=forms.PasswordInput, 
         label="Senha",
-        required=False
+        required=False,
+        help_text="Deixe em branco para manter a senha atual"
     )
 
     class Meta:
@@ -22,20 +24,43 @@ class UsuarioPendenteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
+            # Importante: Inicializa o campo de senha com o valor atual do modelo
+            # (não será mostrado visualmente devido ao widget PasswordInput,
+            # mas estará disponível para o processamento do formulário)
+            self.initial['senha'] = self.instance.senha
+            
+            # Processamento do grupo
             grupo_val = self.instance.grupo
-            if not isinstance(grupo_val, Group):
+            if isinstance(grupo_val, str):
                 try:
                     grupo_obj = Group.objects.get(name=grupo_val)
                     self.initial['grupo'] = grupo_obj.pk
                 except Group.DoesNotExist:
-                    pass
-            else:
+                    print(f"Grupo '{grupo_val}' não encontrado para o usuário {self.instance.username}")
+            elif hasattr(grupo_val, 'pk'):
                 self.initial['grupo'] = grupo_val.pk
+            else:
+                try:
+                    grupo_obj = Group.objects.get(pk=grupo_val)
+                    self.initial['grupo'] = grupo_obj.pk
+                except (Group.DoesNotExist, ValueError, TypeError):
+                    print(f"Valor de grupo inválido: {grupo_val} para o usuário {self.instance.username}")
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        if self.cleaned_data.get('senha'):
-            instance.senha = self.cleaned_data['senha']
+        
+        # IMPORTANTE: Se a senha não foi fornecida no formulário, 
+        # mantém a senha original do modelo
+        senha_form = self.cleaned_data.get('senha')
+        if senha_form:
+            instance.senha = senha_form
+        # Caso contrário, mantém a senha original (que já está no instance)
+        
+        # Armazena o grupo como string (nome do grupo)
+        if self.cleaned_data.get('grupo'):
+            grupo_obj = self.cleaned_data['grupo']
+            instance.grupo = grupo_obj.name
+            
         if commit:
             instance.save()
         return instance

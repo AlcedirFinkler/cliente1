@@ -1,3 +1,4 @@
+# views.py from app gestaoUsuarios
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login
@@ -5,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from .forms import LoginForm, CadastroForm
 from .models import CadastroPendente
+from .services import WeconnService
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -45,6 +47,30 @@ def reiniciar_tentativas(user):
     cache.delete(chave_tentativas)
 
 def login_view(request):
+    # Verifica o status do pagamento do tenant
+    weconn_service = WeconnService()
+    access_status = weconn_service.check_access_status()
+    payment_status = weconn_service.get_payment_status()
+    plan_info = weconn_service.get_plan_info()
+       
+    # Limpar o cache da sessão para forçar uma nova verificação
+    if 'tenant_access_status' in request.session:
+        del request.session['tenant_access_status']
+    if 'tenant_payment_status' in request.session:
+        del request.session['tenant_payment_status']
+    if 'tenant_plan_info' in request.session:
+        del request.session['tenant_plan_info']
+    
+    # Guarda as informações do tenant na sessão
+    request.session['tenant_access_status'] = access_status
+    request.session['tenant_payment_status'] = payment_status
+    request.session['tenant_plan_info'] = plan_info
+
+    # Verifica se o pagamento está expirado ANTES de qualquer tentativa de login
+    if access_status == 'expired' or access_status == 'blocked' or payment_status == 'expirado':
+        # Redirecionar para a página de pagamento expirado sem fazer login
+        return render(request, 'usuarios/pagamento_expirado.html')
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -63,10 +89,7 @@ def login_view(request):
                 if not cadastro.is_approved:
                     messages.error(request, "Aguardando aprovação!")
                     return redirect('login')
-                
-                print('Tentando autenticar usuário...')
-                print(f"Senha fornecida: {password}")
-                
+                               
                 user = authenticate(request, username=username, password=password)               
 
                 if user is not None:
@@ -76,6 +99,13 @@ def login_view(request):
 
                     login(request, user)
                     reiniciar_tentativas(username)
+
+                    # Verificar status de pagamento
+                    if access_status == 'expired' or access_status == 'blocked' or payment_status == 'expirado':
+                        return redirect('pagamento_expirado')
+                    elif access_status == 'grace_period' or payment_status == 'atraso':
+                        # Redirecionar para aviso de atraso, mas permitirá continuar
+                        return redirect('pagamento_atrasado')
 
                     if testegrupo == "Solicitante":
                         print('Renderiza solicitante!')
@@ -232,38 +262,78 @@ def modulos(request):
     
     return render(request, 'usuarios/selecao_modulos.html', context)
 
+
+# Adicionar as funções para pagamento_atrasado e pagamento_expirado
+def pagamento_atrasado(request):
+    """
+    Exibe um alerta de pagamento em atraso, mas permite continuar.
+    """
+    if request.method == 'POST':
+        # Quando o usuário clicar em "Continuar"
+        user = request.user
+        grupo = user.groups.first().name if user.groups.exists() else None
+        
+        if grupo == "Solicitante":
+            return redirect('tela_inicial')
+        elif grupo == "Estoquista":
+            return redirect('selecao_modulos')
+        elif grupo == "Técnico":
+            return redirect('tela_inicial')
+        elif grupo == "Gestor":
+            return redirect('selecao_modulos')
+        else:
+            return redirect('tela_inicial')
+    
+    return render(request, 'usuarios/pagamento_atrasado.html')
+
+def pagamento_expirado(request):
+    """
+    Exibe uma tela de pagamento expirado e não permite continuar.
+    """
+    return render(request, 'usuarios/pagamento_expirado.html')
+
+
 @login_required
 def selecao_modulos(request):
     modules = get_user_modules(request.user)
     is_estoquista = request.user.groups.filter(name="Estoquista").exists()
+    is_gestor = request.user.groups.filter(name="Gestor").exists()
+    
+    # Obtém as informações do tenant (plano e status de pagamento)
+    weconn_service = WeconnService()
+    payment_status = weconn_service.get_payment_status()
+    plan_info = weconn_service.get_plan_info()
+    
+    context = {
+        'modules': modules,
+        'is_estoquista': is_estoquista,
+        'is_gestor': is_gestor,
+        'tenant_payment_status': payment_status,
+        'tenant_plan_info': plan_info,
+    }
     
     if is_estoquista:
-        context = {
-            'modules': modules,
+        context.update({
             'pecas_estoque_minimo': Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo')),
             'pecas_proximas_estoque': Pecas.objects.filter(
                 estoque_atual__gte=F('estoque_minimo'),
                 estoque_atual__lt=F('estoque_minimo') * 1.2
             ),
-            'is_estoquista': True,
-        }
+        })
     else:
         duas_semanas = datetime.now() + timedelta(weeks=2)
-        context = {
-            'modules': modules,
+        context.update({
             'manutencoes_atrasadas': ManutencaoPreventiva.objects.filter(
                 data_proxima_manutencao__lt=datetime.now(), 
                 status='atrasada'
             ),
             'oss_pendentes': Chamado.objects.filter(status='pendente'),
             'pecas_estoque_minimo': Pecas.objects.filter(estoque_atual__lt=F('estoque_minimo')),
-            #'usuarios_pendentes': User.objects.filter(is_active=False),
-            'usuarios_pendentes': User.objects.filter(is_active=False),
             'usuarios_pendentes': CadastroPendente.objects.filter(is_approved=False),
             'proximas_manutencoes': ManutencaoPreventiva.objects.filter(
                 data_proxima_manutencao__lte=duas_semanas, 
                 status='programada'
             ),
-            'is_estoquista': False,
-        }
+        })
+    
     return render(request, 'usuarios/selecao_modulos.html', context)

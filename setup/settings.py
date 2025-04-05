@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'relatorios',
     'monitorESP',
     'bootstrap4',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -83,13 +84,30 @@ WSGI_APPLICATION = 'setup.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('NAME',''),    # dbsoftwareweconn
+        'USER': os.environ.get('USER',''),    # dvweconn
+        'PASSWORD': os.environ.get('PASSWORD',''), # dvweconn12345
+        'HOST': os.environ.get('HOST',''),      #  database-3.c7s2qek46af6.sa-east-1.rds.amazonaws.com
+        'PORT': '5432',
+    }
+}
+'''
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dbsoftwareweconn',    # dbsoftwareweconn
+        'USER': 'dvweconn',    # dvweconn
+        'PASSWORD': 'dvweconn12345', # dvweconn12345
+        'HOST': 'database-3.c7s2qek46af6.sa-east-1.rds.amazonaws.com',      #  database-3.c7s2qek46af6.sa-east-1.rds.amazonaws.com
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
@@ -139,3 +157,26 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Configurações de integração com Weconn
+WECONN_API_KEY = '3qpc1TGv.Zy5j95o6mrrxF8ZBiZCbkFATmWMvYRy2'  # Substituir pela chave real
+WECONN_BASE_URL = 'http://siteweconn-dev.sa-east-1.elasticbeanstalk.com'
+WECONN_TENANT_SLUG = 'PikeOViking'  # Substituir pelo slug do tenant
+
+# Tempo de expiração do cache para informações do tenant (em segundos)
+WECONN_CACHE_TIMEOUT = 1800  # 30 minutos
+
+
+# Amazon S3 configuration
+
+# AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID','')
+# AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY','')
+
+
+# AWS_STORAGE_BUCKET_NAME = 'estaticossoftwaregestao'
+
+# Django 4.2 > 
+# STORAGES = {"staticfiles": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"}}
+
+# AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME

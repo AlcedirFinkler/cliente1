@@ -1,3 +1,5 @@
+# app.py from app gestaoUsuarios
+
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 
@@ -14,6 +16,6 @@ def criar_grupos(sender, **kwargs):
     Função para criar os grupos 'Solicitante', 'Técnico' e 'Gestor' automaticamente.
     """
     from django.contrib.auth.models import Group
-    grupos = ["Solicitante", "Técnico", "Gestor"]
+    grupos = ["Solicitante", "Técnico", "Estoquista", "Gestor"]
     for nome in grupos:
         Group.objects.get_or_create(name=nome)
