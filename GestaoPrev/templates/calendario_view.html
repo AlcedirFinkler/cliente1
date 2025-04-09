@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}GESTOR - Calendários de Manutenções{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
+<link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css" />
+
+
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Calendários de Manutenções Preventivas</h1>
+    </div>
+
+    <div class="mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>Legenda</h5>
+                <div class="row g-2 align-items-center">
+
+                    <div class="col-auto">
+                        <span class="badge rounded-pill" style="background-color: #4CAF50;">&nbsp;&nbsp;</span>
+                        <span class="ms-2">Programada</span>
+                    </div>
+
+                    <div class="col-auto">
+                        <span class="badge rounded-pill" style="background-color: #F44336;">&nbsp;&nbsp;</span>
+                        <span class="ms-2">Atrasada</span>
+                    </div>
+
+                    <div class="col-auto">
+                        <span class="badge rounded-pill" style="background-color: #2196F3;">&nbsp;&nbsp;</span>
+                        <span class="ms-2">Em execução</span>
+                    </div>
+
+                    <div class="col-auto">
+                        <span class="badge rounded-pill" style="background-color: #9E9E9E;">&nbsp;&nbsp;</span>
+                        <span class="ms-2">Finalizada</span>
+                    </div>
+
+                </div>
+
+                <hr class="my-3">
+
+                <p class="mb-0">
+                    <strong><i class="fas fa-chart-bar me-1 text-secondary"></i>Indicadores por mês:</strong>
+                    <span class="ms-3">(TOTAL | ATRASADAS | EM EXECUÇÃO)</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="calendarSection" class="row g-4">
+        {% for cal in calendars %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <strong>
+                        {{ cal.month_name }} {{ cal.year }}
+                        <span class="badge bg-light text-dark ms-2"></span>
+                    </strong>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered mb-0 text-center" data-year="{{ cal.year }}" data-month="{{ cal.month }}">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Dom</th>
+                                <th>Seg</th>
+                                <th>Ter</th>
+                                <th>Qua</th>
+                                <th>Qui</th>
+                                <th>Sex</th>
+                                <th>Sáb</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in cal.calendar %}
+                            <tr>
+                                {% for day in week %}
+                                {% if day != 0 %}
+                                <td class="cursor-pointer p-0 position-relative text-center" 
+                                    data-date="{{ day }}"
+                                    data-year="{{ cal.year }}"
+                                    data-month="{{ cal.month }}"
+                                    onclick="filterByDate(this)">
+                                    <div class="calendar-cell d-flex flex-column align-items-center justify-content-between h-100 py-1">
+                                        <div class="day-number">{{ day }}</div>
+                                        <div class="status-indicators d-flex justify-content-center flex-wrap mt-1"></div>
+                                    </div>
+                                </td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .calendar-cell {
+        height: 60px;
+        padding: 2px;
+    }
+    .status-indicators {
+        flex-wrap: wrap;
+        gap: 2px;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    .status-programada {
+        color: #4CAF50;
+        font-weight: bold;
+    }
+    .status-atrasada {
+        color: #F44336;
+        font-weight: bold;
+    }
+    .status-em_execucao {
+        color: #2196F3;
+        font-weight: bold;
+    }
+    .status-feita {
+        color: #9E9E9E;
+        font-weight: bold;
+    }
+    .status-dot.status-programada {
+        background-color: #4CAF50;
+    }
+    .status-dot.status-atrasada {
+        background-color: #F44336;
+    }
+    .status-dot.status-em_execucao {
+        background-color: #2196F3;
+    }
+    .status-dot.status-feita {
+        background-color: #9E9E9E;
+    }
+    .day-number {
+        font-weight: 500;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const maintenanceDates = JSON.parse('{{ maintenance_dates|escapejs }}');
+        const calendars = document.querySelectorAll('table[data-year]');
+
+        calendars.forEach(calendar => {
+            const year = calendar.dataset.year;
+            const month = calendar.dataset.month;
+            const monthKey = `${year}-${month}`;
+            const monthMaintenances = maintenanceDates[monthKey] || [];
+
+            let total = monthMaintenances.length;
+            let atrasadas = 0;
+            let execucao = 0;
+
+            monthMaintenances.forEach(item => {
+                if (item.status === 'atrasada') atrasadas++;
+                if (item.status === 'em_execucao') execucao++;
+            });
+
+            const header = calendar.closest('.card').querySelector('.card-header .badge');
+            if (header) {
+                header.innerHTML = `
+                    <span data-bs-toggle="tooltip" title="Total de manutenções">
+                        ${total}
+                    </span> /
+                    <span data-bs-toggle="tooltip" title="Atrasadas" class="status-atrasada">
+                        ${atrasadas}
+                    </span> /
+                    <span data-bs-toggle="tooltip" title="Em execução" class="status-em_execucao">
+                        ${execucao}
+                    </span>
+                `;
+            }
+
+            calendar.querySelectorAll('td[data-date]').forEach(cell => {
+                const day = cell.getAttribute('data-date');
+                const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const maintenancesToday = monthMaintenances.filter(item => item.date === dateString);
+
+                if (maintenancesToday.length > 0) {
+                    const indicatorDiv = cell.querySelector('.status-indicators');
+                    indicatorDiv.innerHTML = '';
+
+                    if (maintenancesToday.length > 3) {
+                        const statusCounts = {};
+                        maintenancesToday.forEach(m => {
+                            statusCounts[m.status] = (statusCounts[m.status] || 0) + 1;
+                        });
+
+                        let mostCommonStatus = Object.keys(statusCounts).reduce((a, b) =>
+                            statusCounts[a] >= statusCounts[b] ? a : b
+                        );
+
+                        const dot = document.createElement('div');
+                        dot.classList.add('status-dot', `status-${mostCommonStatus}`);
+                        indicatorDiv.appendChild(dot);
+
+                        const count = document.createElement('div');
+                        count.textContent = `+${maintenancesToday.length}`;
+                        count.style.fontSize = '0.6rem';
+                        indicatorDiv.appendChild(count);
+                    } else {
+                        maintenancesToday.forEach(m => {
+                            const dot = document.createElement('div');
+                            dot.classList.add('status-dot', `status-${m.status}`);
+                            indicatorDiv.appendChild(dot);
+                        });
+                    }
+
+                    const tooltipContent = maintenancesToday.map(m =>
+                        `<div>
+                            <strong>${m.equipamento_nome}</strong>
+                            <br>
+                            Setor: ${m.equipamento_setor}
+                            <br>
+                            Status: <span class="status-${m.status}">${m.status}</span>
+                        </div>`
+                    ).join('<hr class="my-1">');
+
+                    tippy(cell, {
+                        content: tooltipContent,
+                        allowHTML: true,
+                        theme: 'light-border',
+                        placement: 'top',
+                        interactive: true
+                    });
+                }
+                                
+                cell.classList.add('clickable-day');
+                cell.style.cursor = 'pointer';
+                cell.addEventListener('click', () => {
+                    window.location.href = `/manutencoes/?data=${dateString}`;
+                });
+
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.forEach(tooltipTriggerEl => {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+        });
+    });
+</script>
+
+{% endblock %}

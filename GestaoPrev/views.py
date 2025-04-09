@@ -291,6 +291,43 @@ def listar_manutencoes(request):
     return render(request, 'listar_manutencoes.html', context)
 
 @login_required
+def visualizar_calendarios(request): 
+    today = date.today()
+    calendars = []
+    maintenance_dates = {}
+
+    for i in range(12):  # próximos 12 meses
+        target_date = today + timedelta(days=i * 31)
+        year = target_date.year
+        month = target_date.month
+        
+        month_maintenances = ManutencaoPreventiva.objects.select_related('equipamento').filter(
+            data_proxima_manutencao__year=year,
+            data_proxima_manutencao__month=month
+        )
+
+        maintenance_dates[f"{year}-{month}"] = [
+            {
+                'date': m.data_proxima_manutencao.strftime('%Y-%m-%d'),
+                'status': m.status,
+                'equipamento_nome': m.equipamento.nome if m.equipamento else '',
+                'equipamento_tag': m.equipamento.tag if m.equipamento else '',
+                'equipamento_classe': m.equipamento.classe if m.equipamento else '',
+                'equipamento_setor': m.equipamento.setor.nome if m.equipamento and m.equipamento.setor else '',
+                'manutencao_id': m.id,
+            }
+            for m in month_maintenances
+        ]
+        
+        calendars.append(get_month_calendar(year, month))
+
+    return render(request, 'calendario_view.html', {
+        'calendars': calendars,
+        'maintenance_dates': json.dumps(maintenance_dates), 
+        'today': today,
+    })
+
+@login_required
 def gerar_os_preventiva(request, manutencao_id):
     manutencao = get_object_or_404(ManutencaoPreventiva, id=manutencao_id)
 

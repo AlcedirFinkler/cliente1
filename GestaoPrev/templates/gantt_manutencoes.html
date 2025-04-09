@@ -173,7 +173,7 @@
         bottom: 0;
         width: 2px;
         background-color: #FF5722;
-        z-index: 1;
+        z-index: 2;
     }
 
     .gantt-bar {
@@ -402,6 +402,7 @@
         const effectiveMaxDate = new Date(maxDate);
         effectiveMaxDate.setDate(effectiveMaxDate.getDate() + 1);
         const totalDuration = maxDate - minDate;
+        const totalDays = parseInt("{{ total_days|default:1 }}", 10);
         const containerWidth = document.querySelector('.bars-container').offsetWidth;
         const today = new Date();
         
@@ -411,16 +412,17 @@
         // Posicionar a linha de "hoje" usando effectiveMaxDate
         if (today >= minDate && today <= effectiveMaxDate) {
             const daysFromStart = Math.floor((today - minDate) / (1000 * 3600 * 24));
-            const leftPercent = (daysFromStart / {{ total_days }}) * 100;
-            
-            const barsContainers = document.querySelectorAll('.bars-container');
-            barsContainers.forEach(container => {
-                const todayLine = document.createElement('div');
-                todayLine.className = 'today-line';
-                todayLine.style.left = `${leftPercent}%`;
-                container.appendChild(todayLine);
-            });
-        }
+            const leftPercent = (daysFromStart / totalDays) * 100;
+
+            const todayLine = document.createElement('div');
+            todayLine.className = 'today-line';
+            todayLine.style.left = `${leftPercent}%`;
+
+            const rowsContainer = document.querySelector('.rows-container');
+            if (rowsContainer) {
+                rowsContainer.appendChild(todayLine);
+            }
+        } 
 
         // Posicionar as barras no Gantt
         bars.forEach(bar => {
@@ -429,10 +431,10 @@
             
             // Calcular posição left
             const daysFromStart = Math.floor((startDate - minDate) / (1000 * 3600 * 24));
-            const leftPercent = (daysFromStart / {{ total_days }}) * 100;
+            const leftPercent = (daysFromStart / "{{ total_days }}") * 100;
             
             // Calcular largura com base na duração
-            const widthPercent = (durationDays / {{ total_days }}) * 100;
+            const widthPercent = (durationDays / "{{ total_days }}") * 100;
             
             bar.style.left = `${leftPercent}%`;
             bar.style.width = `${Math.max(widthPercent, 3)}%`; // Mínimo de 3% para visibilidade
@@ -559,7 +561,8 @@
                 
                 // Calcular nova largura para as barras
                 const barsContainers = document.querySelectorAll('.bars-container');
-                const newWidth = {{ total_days }} * dayWidth;
+                const totalDays = parseInt("{{ total_days|default:1 }}", 10);
+                const newWidth = totalDays * dayWidth;
                 
                 barsContainers.forEach(container => {
                     container.style.minWidth = `${newWidth}px`;
