@@ -3,63 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <style> 
-        .sidenav {
-            height: 100%;
-            width: 250px;
-            position: fixed;
-            z-index: 1;
-            top: 0;
-            left: 0;
-            background-color: #313541;
-            overflow-x: hidden;
-            padding-top: 20px;
-        }
-        
-        .sidenav a {
-            padding-left: 32px;
-            padding-bottom: 12px;
-            text-decoration: none;
-            font-size: 20px;
-            color: #818181;
-            display: block;
-        }
-        
-        .sidenav h1 {
-            padding-top: 20px;
-            padding-left: 32px;
-            text-decoration: none;
-            font-size: 30px;
-            color: #c4c4c4;
-            display: block;
-        }
-
-        .sidenav a:hover {
-            color: #f1f1f1;
-        }
-
-        .sidenav .bottom-links {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            margin-bottom: 35px;
-        }
-
-        .sidenav .bottom-links .logout-link {
-            color: rgb(150, 0, 0);
-        }
-
-        .sidenav .bottom-links .logout-link:hover {
-            color: rgb(255, 0, 0);
-        }
-
-        .sidenav img {
-            display: block;
-            margin: 0 auto 20px auto;
-            width: 80%;
-            height: auto;
-        }
-        
+    <style>         
         main {
             margin-left: 250px; /* mesmo da sidenav */
         }
@@ -119,37 +63,36 @@
         .modal-body {
         max-height: 400px;
         overflow-y: auto;
-    }
-    .part-list-item, .collaborator-list-item {
-        cursor: pointer;
-    }
-    .part-list-item:hover, .collaborator-list-item:hover {
-        background-color: #f0f0f0;
-    }
-    .selected-part, .selected-collaborator {
-        background-color: #e0e0e0;
-    }
-    .part-list-item .quantity-input {
-        display: none;
-    }
-    .selected-part .quantity-input {
-        display: block;
-    }
-    .selected-part-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px;
-        margin-bottom: 5px;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-    .remove-part, .remove-collaborator {
-        color: red;
-        cursor: pointer;
-    }
-
+        }
+        .part-list-item, .collaborator-list-item {
+            cursor: pointer;
+        }
+        .part-list-item:hover, .collaborator-list-item:hover {
+            background-color: #f0f0f0;
+        }
+        .selected-part, .selected-collaborator {
+            background-color: #e0e0e0;
+        }
+        .part-list-item .quantity-input {
+            display: none;
+        }
+        .selected-part .quantity-input {
+            display: block;
+        }
+        .selected-part-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            margin-bottom: 5px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        .remove-part, .remove-collaborator {
+            color: red;
+            cursor: pointer;
+        }
         
         @media screen and (max-height: 450px) {
             .sidenav {padding-top: 15px;}
