@@ -62,4 +62,3 @@ class ManutencaoPreventivaForm(forms.ModelForm):
         self.fields['equipamento'].required = True
         self.fields['descricao'].required = True
         self.fields['tipo_calculo'].required = True
-        self.fields['requer_parada'].required = True
