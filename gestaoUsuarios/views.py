@@ -205,8 +205,7 @@ def get_user_modules(user):
         {"name": "Mant. Preventivas", "url": reverse('listar_manutencoes'), "icon": "bi-tools", "enabled": False,
           "submenu": [
              {"name": "Tabelas", "url": reverse('listar_manutencoes')},
-             {"name": "Calendário", "url": reverse('calendario_view')},
-             {"name": "Gráfico Gantt", "url": reverse('gantt_manutencoes')}
+             {"name": "Calendário", "url": reverse('calendario_view')}
          ]},
         {"name": "Controle Estoque", "url": reverse('cadEstoque'), "icon": "bi-box", "enabled": False},
         {"name": "Cadastro Equipamentos", "url": reverse('CadEquip'), "icon": "bi-gear", "enabled": False},

@@ -56,6 +56,60 @@
         font-weight: bold;
         border: 2px solid #007bff;
     }
+    
+    @media (max-width: 990px) {
+        .maintenance-table {
+            display: none;
+        }
+
+        .maintenance-card {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .maintenance-card div {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .maintenance-card div span {
+            font-weight: bold;
+            width: 40%; 
+            text-align: left;
+        }
+
+        .maintenance-card div p {
+            margin: 0;
+            width: 60%; 
+            text-align: right;
+        }
+
+        .maintenance-card-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .maintenance-card-actions a,
+        .maintenance-card-actions button {
+            font-size: 14px;
+        }
+    }
+
+    @media (min-width: 991px) {
+        .maintenance-card {
+            display: none;
+        }
+    }
 </style>
 
 <div class="content-container">
@@ -121,7 +175,6 @@
         </form>
     </table>
 
-    <!-- Tabela de Manutenções -->
     <table class="maintenance-table" border="1">
         <thead>
             <tr>
@@ -157,6 +210,49 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="maintenance-cards">
+        {% for manutencao in manutencoes %}
+        <div class="maintenance-card">
+            <div>
+                <span>TAG:</span>
+                <p>{{ manutencao.equipamento.tag }}</p>
+            </div>
+            <div>
+                <span>Equipamento:</span>
+                <p>{{ manutencao.equipamento.nome }}</p>
+            </div>
+            <div>
+                <span>Setor:</span>
+                <p>{{ manutencao.equipamento.setor }}</p>
+            </div>
+            <div>
+                <span>Descrição:</span>
+                <p>{{ manutencao.descricao|truncatechars:50 }}</p>
+            </div>
+            <div>
+                <span>Status:</span>
+                <p>{{ manutencao.get_status_display }}</p>
+            </div>
+            <div>
+                <span>Data Última Manutenção:</span>
+                <p>{{ manutencao.data_ultima_manutencao }}</p>
+            </div>
+            <div>
+                <span>Data Próxima Manutenção:</span>
+                <p>{{ manutencao.data_proxima_manutencao }}</p>
+            </div>
+            <div class="maintenance-card-actions">
+                <a href="{% url 'editar_manutencao' manutencao.id %}" class="custom-button">Editar</a>
+                <form method="post" action="{% url 'excluir_manutencao' manutencao.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                    {% csrf_token %}
+                    <button type="submit" class="custom-button delete-button">Excluir</button>
+                </form>
+                <a href="{% url 'gerar_os_preventiva' manutencao.id %}" class="custom-button">Gerar OS</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script>
