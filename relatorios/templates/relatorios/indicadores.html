@@ -68,32 +68,17 @@
         .accordion-button.collapsed::after {
             transform: rotate(-90deg);
         }
-        .sidenav a, .sidenav h1 {
-            all: unset;
-            display: block;
-            text-decoration: none;
-            font-family: 'Roboto', sans-serif;
-        }
-        .sidenav a {
-            padding-left: 32px;
-            padding-bottom: 5px;
-            font-size: 20px;
-            color: #818181;
-        }
-        .sidenav h1 {
-            padding-top: 14px;
-            padding-bottom: 11px;
-            padding-left: 32px;
-            font-size: 30px;
-            color: #c4c4c4;
-            font-weight: bold;
-        }
-        
-        .sidenav .bottom-links {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            margin-bottom: 18px;
+
+        @media (max-width: 990px) {
+            .table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .accordion {
+                display: none;
+            }
         }
     </style>
 </head>
