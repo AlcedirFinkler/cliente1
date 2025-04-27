@@ -22,6 +22,60 @@
     .content-container .delete-button:hover {
         background-color: rgb(255, 0 ,0);
     }
+
+    @media (max-width: 990px) {
+        .table {
+            display: none;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card div {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .card div span {
+            font-weight: bold;
+            width: 40%; 
+            text-align: left;
+        }
+
+        .card div p {
+            margin: 0;
+            width: 60%; 
+            text-align: right;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .card-actions a,
+        .card-actions button {
+            font-size: 14px;
+        }
+    } 
+
+    @media (min-width: 991px) {
+        .cards-container {
+            display: none;
+        }
+    }
 </style>
 
 <div class="content-container">
@@ -88,7 +142,7 @@
     </table>
 
     <!-- Tabela de Equipamentos -->
-    <table border="1">
+    <table class="table" border="1">
         <thead>
             <tr>
                 <th>TAG</th>
@@ -103,31 +157,60 @@
         </thead>
         <tbody>
             {% for equipamento in equipamentos %}
-                <tr>
-                    <td>{{ equipamento.tag }}</td>
-                    <td>{{ equipamento.nome }}</td>
-                    <td>{{ equipamento.fabricante }}</td>
-                    <td>{{ equipamento.modelo }}</td>
-                    <td>{{ equipamento.setor.nome }}</td>
-                    <td>{{ equipamento.classe }}</td>
-                    <td style="text-align: center;">
-                        {% if equipamento.foto %}
-                            <img src="{{ equipamento.foto.url }}" alt="Foto do equipamento {{ equipamento.nome }}" style="max-width: 100px; max-height: 100px;">
-                        {% else %}
-                            Sem foto
-                        {% endif %}
-                    </td>
-                    <td style="text-align: center;">
-                        <a href="{% url 'editar_equipamento' equipamento.id %}" class="custom-button table-button">Editar</a>
-                        <form method="post" action="{% url 'excluir_equipamento' equipamento.id %}" style="display:inline;" onsubmit="return confirmDelete();">
-                            {% csrf_token %}
-                            <button type="submit" class="custom-button table-button delete-button">Excluir</button>
-                        </form>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ equipamento.tag }}</td>
+                <td>{{ equipamento.nome }}</td>
+                <td>{{ equipamento.fabricante }}</td>
+                <td>{{ equipamento.modelo }}</td>
+                <td>{{ equipamento.setor.nome }}</td>
+                <td>{{ equipamento.classe }}</td>
+                <td style="text-align: center;">
+                    {% if equipamento.foto %}
+                        <img src="{{ equipamento.foto.url }}" alt="Foto do equipamento {{ equipamento.nome }}" style="max-width: 100px; max-height: 100px;">
+                    {% else %}
+                        Sem foto
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <a href="{% url 'editar_equipamento' equipamento.id %}" class="custom-button table-button">Editar</a>
+                    <form method="post" action="{% url 'excluir_equipamento' equipamento.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="submit" class="custom-button table-button delete-button">Excluir</button>
+                    </form>
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="cards-container">
+        {% for equipamento in equipamentos %}
+        <div class="card">
+            <div><span>TAG:</span><p>{{ equipamento.tag }}</p></div>
+            <div><span>Nome:</span><p>{{ equipamento.nome }}</p></div>
+            <div><span>Fabricante:</span><p>{{ equipamento.fabricante }}</p></div>
+            <div><span>Modelo:</span><p>{{ equipamento.modelo }}</p></div>
+            <div><span>Setor:</span><p>{{ equipamento.setor.nome }}</p></div>
+            <div><span>Classe:</span><p>{{ equipamento.classe }}</p></div>
+            <div><span>Foto:</span>
+                <p>
+                    {% if equipamento.foto %}
+                        <img src="{{ equipamento.foto.url }}" alt="Foto do equipamento {{ equipamento.nome }}" style="max-width: 100px; max-height: 100px;">
+                    {% else %}
+                        Sem foto
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'editar_equipamento' equipamento.id %}" class="custom-button">Editar</a>
+                <form method="post" action="{% url 'excluir_equipamento' equipamento.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                    {% csrf_token %}
+                    <button type="submit" class="custom-button delete-button">Excluir</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script>
