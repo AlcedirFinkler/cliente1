@@ -22,6 +22,60 @@
     .content-container .delete-button:hover {
         background-color: rgb(255, 0 ,0);
     }
+
+    @media (max-width: 990px) {
+        .table {
+            display: none;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card div {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .card div span {
+            font-weight: bold;
+            width: 40%; 
+            text-align: left;
+        }
+
+        .card div p {
+            margin: 0;
+            width: 60%; 
+            text-align: right;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .card-actions a,
+        .card-actions button {
+            font-size: 14px;
+        }
+    }
+
+    @media (min-width: 991px){
+        .card {
+            display: none;
+        }
+    }
 </style>
 
 <div class="content-container">
@@ -69,8 +123,7 @@
         </form>
     </table>
 
-    <!-- Tabela de Peças -->
-    <table border="1">
+    <table class="table" border="1">
         <thead>
             <tr>
                 <th>Cadastro Nº</th>
@@ -112,12 +165,52 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="cards-container">
+        {% for peca in pecas %}
+        <div class="card">
+            <div><span>Cadastro Nº:</span><p>{{ peca.id }}</p></div>
+            <div><span>Descrição:</span><p>{{ peca.descricao|truncatechars:50 }}</p></div>
+            <div><span>Código:</span><p>{{ peca.codigo }}</p></div>
+            <div><span>Fornecedor:</span><p>{{ peca.fornecedor }}</p></div>
+            <div><span>Estoque:</span><p>{{ peca.estoque_atual }}</p></div>
+            <div><span>Preço:</span><p>R${{ peca.preco }}</p></div>
+            <div class="imagem-tabela"><span>Imagem:</span>
+                <p>
+                    {% if peca.foto %}
+                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ peca.foto_url }}" target="_blank">
+                            <img src="{{ request.scheme }}://{{ request.get_host }}{{ peca.foto_url }}" style="width: 50px; height: 50px; object-fit: cover;">
+                        </a>
+                    {% else %}
+                        <span style="color: #999; font-style: italic;">Sem Imagem</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'editar_peca' peca.id %}" class="custom-button">Editar</a>
+                <form method="post" action="{% url 'excluir_peca' peca.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                    {% csrf_token %}
+                    <button type="submit" class="custom-button delete-button">Excluir</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script>
     function confirmDelete() {
         return confirm('Tem certeza que deseja excluir esta peça?');
     }
+
+    // não consegui remover com css... talvez tenha algum problema com a .card, porém isso funciona
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth <= 990) {
+            document.querySelectorAll('.imagem-tabela').forEach(function(element) {
+                element.remove();
+            });
+        }
+    });
 </script>
 
 {% endblock %}
