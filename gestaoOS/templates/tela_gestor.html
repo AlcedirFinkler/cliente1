@@ -22,6 +22,70 @@
     .content-container .delete-button:hover {
         background-color: rgb(255, 0 ,0);
     }
+
+    @media (max-width: 990px) {
+        .table {
+            display: none;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card div {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .card div span {
+            font-weight: bold;
+            width: 40%; 
+            text-align: left;
+        }
+
+        .card div p {
+            margin: 0;
+            width: 60%; 
+            text-align: right;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .card-actions a,
+        .card-actions button {
+            font-size: 14px;
+        }
+    }
+    
+    @media (min-width: 991px) {
+        .cards-container {
+            display: none;
+        }
+    }
+
+    @media (max-width: 767px){
+        .tipo-manutencao {
+            display: none;
+        }
+
+        .equipamento  {
+            display: none;
+        }
+    }
 </style>
 
 <div class="content-container">
@@ -31,10 +95,10 @@
     </div>
 
     <!-- Formulário de filtros -->
-    <table class="tabela-sem-divisoes" style="border: none;">
-        <form method="get" action="{% url 'tela_inicial' %}">
+    <form method="get" action="{% url 'tela_inicial' %}">
+        <table class="tabela-sem-divisoes" style="border: none;">
             <!-- Filtro: Solicitante -->
-            <td style="width: 15%">
+            <td>
                 <div>
                     <label for="usuario">Solicitante:</label>
                     <input type="text" name="usuario" id="usuario" placeholder="Digite parte do nome" value="{{ request.GET.usuario }}">
@@ -42,7 +106,7 @@
             </td>
 
             <!-- Filtro: Status -->
-            <td style="width: 15%">
+            <td>
                 <div>
                     <label for="status">Status:</label>
                     <select name="status" id="status">
@@ -57,7 +121,7 @@
             </td>
 
             <!-- Filtro: Técnico -->
-            <td style="width: 15%">
+            <td>
                 <div>
                     <label for="tecnico">Técnico:</label>
                     <select name="tecnico" id="tecnico">
@@ -70,7 +134,7 @@
             </td>
 
             <!-- Filtro: Setor -->
-            <td style="width: 15%">
+            <td>
                 <div>
                     <label for="setor">Setor:</label>
                     <select name="setor" id="setor">
@@ -83,23 +147,23 @@
             </td>
 
             <!-- Filtro: Título/Descrição -->
-            <td style="width: 15%">
+            <td>
                 <div>
-                    <label for="titulo_descricao">Título/Descrição:</label>
+                    <label for="titulo_descricao">Desc.:</label>
                     <input type="text" name="titulo_descricao" id="titulo_descricao" placeholder="Digite palavras-chave" value="{{ request.GET.titulo_descricao }}">
                 </div>
             </td>
 
             <!-- Filtro: Equipamento -->
-            <td style="width: 15%">
-                <div>
+            <td>
+                <div class="equipamento">
                     <label for="equipamento">Equipamento:</label>
                     <input type="text" name="equipamento" id="equipamento" placeholder="Equipamento" value="{{ request.GET.equipamento }}">
                 </div>
             </td>
 
             <!-- Filtro: Tipo de Manutenção -->
-            <td style="width: 15%">
+            <td class="tipo-manutencao">
                 <div>
                     <label for="tipo_manutencao">Tipo de Manutenção:</label>
                     <select name="tipo_manutencao" id="tipo_manutencao">
@@ -112,9 +176,9 @@
             </td>
 
             <!-- Filtro: Data -->
-            <td style="width: 10%">
+            <td>
                 <div>
-                    <label for="data">Ordenar por Data:</label>
+                    <label for="data">Ordenar por:</label>
                     <select name="data" id="data">
                         <option value="">Mais recente</option>
                         <option value="mais_antigo">Mais antigo</option>
@@ -123,16 +187,15 @@
             </td>
 
             <!-- Botão "Filtrar" -->
-            <td style="width: 10%">
+            <td>
                 <div style="text-align: center;">
                     <button type="submit" class="btn btn-primary">Filtrar</button>
                 </div>
             </td>
-        </form>
-    </table>
+        </table>
+    </form>
 
-    <!-- Tabela de Chamados -->
-    <table border="1">
+    <table class="table" border="1">
         <thead>
             <tr>
                 <th>OS nº</th>
@@ -190,6 +253,50 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="cards-container">
+        {% for chamado in chamados_por_solicitante %}
+        <div class="card">
+            <div><span>OS nº:</span><p>{{ chamado.id }}</p></div>
+            <div><span>Solicitante:</span><p>{{ chamado.usuario }}</p></div>
+            <div><span>Status:</span><p>{{ chamado.status }}</p></div>
+            <div><span>Técnico:</span>
+                <p>
+                    {% if chamado.tecnico %}
+                        {{ chamado.tecnico.get_full_name|default:chamado.tecnico.username }}
+                    {% else %}
+                        Não Atribuído
+                    {% endif %}
+                </p>
+            </div>
+            <div><span>Setor:</span><p>{{ chamado.setor }}</p></div>
+            <div><span>Título:</span><p>{{ chamado.titulo }}</p></div>
+            <div><span>Descrição:</span><p>{{ chamado.descricao|truncatechars:50 }}</p></div>
+            <div><span>Tipo de Manutenção:</span><p>{{ chamado.tipo_manutencao }}</p></div>
+            <div><span>TAG:</span><p>{{ chamado.equipamento.tag }}</p></div>
+            <div><span>Equipamento:</span><p>{{ chamado.equipamento }}</p></div>
+            <div><span>Data da Solicitação:</span><p><small>{{ chamado.data_criacao|date:"d/m/Y H:i" }}</small></p></div>
+            <div><span>Imagem:</span>
+                <p>
+                    {% if chamado.foto_url %}
+                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ chamado.foto_url }}" target="_blank">
+                            <img src="{{ request.scheme }}://{{ request.get_host }}{{ chamado.foto_url }}" style="width: 50px; height: 50px; object-fit: cover;">
+                        </a>
+                    {% else %}
+                        <span style="color: #999; font-style: italic;">Sem Imagem</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-actions">
+                <a href="{% url 'gerenciar_acoes' chamado.id %}" class="custom-button">Editar</a>
+                <form method="post" action="{% url 'excluir_chamado' chamado.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                    {% csrf_token %}
+                    <button type="submit" class="custom-button delete-button">Excluir</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script>
