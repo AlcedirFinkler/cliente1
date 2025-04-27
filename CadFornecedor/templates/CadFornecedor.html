@@ -22,14 +22,68 @@
     .content-container .delete-button:hover {
         background-color: rgb(255, 0 ,0);
     }
+
+    @media (max-width: 990px) {
+        .table {
+            display: none;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card div {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .card div span {
+            font-weight: bold;
+            width: 40%; 
+            text-align: left;
+        }
+
+        .card div p {
+            margin: 0;
+            width: 60%; 
+            text-align: right;
+        }
+
+        .card-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .card-actions a,
+        .card-actions button {
+            font-size: 14px;
+        }
+    } 
+
+    @media (min-width: 991px) {
+        .cards-container {
+            display: none;
+        }
+    }
 </style>
 
 <div class="content-container">
     <div class="top-side">
         <h1 style="text-align: left; margin-left: 40px;">Gestão de Fornecedores</h1>
         <div>
-            <button type="submit" class="btn btn-success" name="exportar_excel" value="true">Exportar Excel</button>
-            <a href="{% url 'CriaFornecedor' %}" class="custom-button">Cadastrar Novo Fornecedor</a>
+            <button type="submit" class="btn btn-success" name="exportar_excel" value="true" style="padding-top: 5px">Exportar Excel</button>
+            <a href="{% url 'CriaFornecedor' %}" class="custom-button">Novo Fornecedor</a>
         </div>
     </div>
 
@@ -69,8 +123,7 @@
         </form>
     </table>
 
-    <!-- Tabela de Fornecedores -->
-    <table border="1">
+    <table class="table" border="1">
         <thead>
             <tr>
                 <th>Nome do Fornecedor</th>
@@ -98,6 +151,24 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <div class="cards-container">
+        {% for fornecedor in fornecedores %}
+        <div class="card">
+            <div><span>Nome do Fornecedor:</span><p>{{ fornecedor.fornecedor }}</p></div>
+            <div><span>Telefone:</span><p>{{ fornecedor.fornecedor_fone }}</p></div>
+            <div><span>Site:</span><p>{{ fornecedor.fornecedor_site|truncatechars:65 }}</p></div>
+            <div><span>Email:</span><p>{{ fornecedor.fornecedor_email }}</p></div>
+            <div class="card-actions">
+                <a href="{% url 'editar_fornecedor' fornecedor.id %}" class="custom-button">Editar</a>
+                <form method="post" action="{% url 'excluir_fornecedor' fornecedor.id %}" style="display:inline;" onsubmit="return confirmDelete();">
+                    {% csrf_token %}
+                    <button type="submit" class="custom-button delete-button">Excluir</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <script>
