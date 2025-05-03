@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-w24e=3w=s4-4yl38@imz$d)sq0d+#%agh$jh7d6_ziva!e0vkz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -99,12 +99,8 @@ DATABASES = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dbsoftwareweconn',    # dbsoftwareweconn
-        'USER': 'dvweconn',    # dvweconn
-        'PASSWORD': 'dvweconn12345', # dvweconn12345
-        'HOST': 'database-3.c7s2qek46af6.sa-east-1.rds.amazonaws.com',      #  database-3.c7s2qek46af6.sa-east-1.rds.amazonaws.com
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -160,9 +156,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Configurações de integração com Weconn
-WECONN_API_KEY = '3qpc1TGv.Zy5j95o6mrrxF8ZBiZCbkFATmWMvYRy2'  # Substituir pela chave real
-WECONN_BASE_URL = 'http://siteweconn-dev.sa-east-1.elasticbeanstalk.com'
-WECONN_TENANT_SLUG = 'PikeOViking'  # Substituir pelo slug do tenant
+WECONN_API_KEY = 'kknwBsJH.7Hbh0974pqYMMYUIa8ejixoCjk3yaFN3'  # Substituir pela chave real
+WECONN_BASE_URL = 'http://www.weconn.net.br'
+WECONN_TENANT_SLUG = 'empresa1'  # Substituir pelo slug do tenant
 
 # Tempo de expiração do cache para informações do tenant (em segundos)
 WECONN_CACHE_TIMEOUT = 1800  # 30 minutos
